@@ -65,9 +65,9 @@ Secret Key S = {
   
   For this example:
   ```
-  **Camera** uses those coordinates to zoom to specific grid positions
+  Camera uses those coordinates to zoom to specific grid positions
 
-  **OCR** reads characters at each position → collects "Xk9mP"
+  OCR reads characters at each position → collects "Xk9mP"
   ```
   #### Byte stream implementation:
   The grid is stored in a memory region and we employ classical arrays/pointer mechanism and determine the cipher text.
