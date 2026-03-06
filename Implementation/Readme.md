@@ -30,7 +30,7 @@ Q T W R S B N K M P L A X Z Y D F V G C H U
 ### Step 3: **Generate Secret Key S**
 
 According to the paper, the secret key contains:
-```
+
 Secret Key S = {
   1. Stencil Set SRl (chosen shapes)
   2. Bijection function g (maps partitions to stencils)
@@ -38,6 +38,16 @@ Secret Key S = {
   4. Permutation σ 
   5. Starting position
   ...
+}
+
+For this example,
+```
+Secret Key S = {
+  1. Stencil Set SRl = {"L-shape"}
+  2. Starting_coordinates: {(2,3)},
+  3. Partition: [1, 1, 3], --> 'X', 'k', '9mP'
+  4. Reading_order: "Top-to-bottom, left-to-right",
+  5. MHKC/AES crypto secret key K
 }
 ```
 
