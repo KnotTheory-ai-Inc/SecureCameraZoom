@@ -64,10 +64,11 @@ Secret Key S = {
   Assume the Grid is printed on a paper, using Computer vision techniques, detect the overall grid and employ the camera to extract the cipher text.
   
   For this example:
-  '''
+  ```
   **Camera** uses those coordinates to zoom to specific grid positions
+
   **OCR** reads characters at each position → collects "Xk9mP"
-  '''
+  ```
   #### Byte stream implementation:
   The grid is stored in a memory region and we employ classical arrays/pointer mechanism and determine the cipher text.
 
