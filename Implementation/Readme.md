@@ -52,21 +52,28 @@ Secret Key S = {
 ```
 
 ### Step 4: **Transmission/Reception channel - Communication network**
- **The grid** (as byte stream over network(Byte stream implementation) or as physical paper(OCR implementation))
-
- #### Camera zoom based OCR technique:
- Assume the Grid is printed on a paper, using Computer vision techniques, detect the overall grid and employ the camera to perform the Step 5 - Level 1 Decryption.
- #### Byte stream implementation:
- The grid is stored in a memory region and we employ classical arrays/pointer mechanism for step 5 - Level 1 Decryption.
+ **The grid** (as byte stream over network(Byte stream implementation) or as physical paper through fax (OCR implementation))
 
 
 ### Step 5: **Steganographic Decryption (Level 1 decryption) **
-Input: 
-  1. Obscure Grid
-  2. Assume the receiver already has : **The secret key S** (stencil indices/coordinates + crypto key)
+  Input: 
+    1. Obscure Grid
+    2. Assume the receiver already has : **The secret key S** (stencil indices/coordinates + crypto key)
 
-Output:
-  Cipher text - "Xk9mP"
+  #### Camera zoom based OCR technique:
+  Assume the Grid is printed on a paper, using Computer vision techniques, detect the overall grid and employ the camera to extract the cipher text.
+  
+  For this example:
+  '''
+  **Camera** uses those coordinates to zoom to specific grid positions
+  **OCR** reads characters at each position → collects "Xk9mP"
+  '''
+  #### Byte stream implementation:
+  The grid is stored in a memory region and we employ classical arrays/pointer mechanism and determine the cipher text.
+
+
+  Output:
+    Cipher text - "Xk9mP"
 
 ### Step 6: **Decrypt the Cipher text (Level 2 decryption) **
 
