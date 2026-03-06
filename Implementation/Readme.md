@@ -1,4 +1,8 @@
-# The Encryption - Decryption implementation idea
+# The Overall Workflow of the Paper-Pencil Crypto-scheme
+
+![The Workflow](Paper-Pencil-Block-Diag.jpeg)
+
+# Detailed Workflow with an example
 
 ### Step 1: **Encrypt the plain text First (Level 1 encryption)**
 
@@ -38,7 +42,12 @@ Secret Key S = {
 ```
 
 ### Step 4: **Transmission/Reception channel - Communication network**
-1. **The grid** (as byte stream over network(Byte stream implementation) or as physical paper(OCR implementation))
+ **The grid** (as byte stream over network(Byte stream implementation) or as physical paper(OCR implementation))
+
+ #### Camera zoom based OCR technique:
+ Assume the Grid is printed on a paper, using Computer vision techniques, detect the overall grid and employ the camera to perform the Step 5 - Level 1 Decryption.
+ #### Byte stream implementation:
+ The grid is stored in a memory region and we employ classical arrays/pointer mechanism for step 5 - Level 1 Decryption.
 
 
 ### Step 5: **Steganographic Decryption (Level 1 decryption) **
@@ -54,3 +63,5 @@ Output:
 Using Classical decryption schemes: MHKC/AES with crypto secret key K
 
 "Xk9mP" → [Decryption] → "HELLO"
+
+
