@@ -31,8 +31,8 @@ Secret Key S = {
   1. Stencil Set SRl (chosen shapes)
   2. Bijection function g (maps partitions to stencils)
   3. MHKC/AES crypto secret key K
-  4. Permutation σ (how message was shuffled)
-  5. Starting position (optional)
+  4. Permutation σ 
+  5. Starting position
   ...
 }
 ```
