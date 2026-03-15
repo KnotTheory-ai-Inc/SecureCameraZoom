@@ -1,0 +1,5 @@
+# Python PoC Implementation dependencies
+
+pycryptodome        # AES encryption/decryption
+pytest              # Unit and integration testing
+pytest-cov          # Test coverage reporting

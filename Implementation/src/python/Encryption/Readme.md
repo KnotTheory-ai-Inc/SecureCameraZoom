@@ -18,7 +18,7 @@
 ```python
 def cipher_encrypt(plaintext: bytes, key_K: bytes) -> bytes:
     """
-    Encrypt plaintext using AES-256-CBC (recommended) or MHKC.
+    Encrypt plaintext using AES or MHKC.
     - Input: plaintext (bytes, e.g. b"HELLO"), key_K (bytes)
     - Output: ciphertext as bytes
     """
