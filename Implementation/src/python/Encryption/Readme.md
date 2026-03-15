@@ -63,7 +63,7 @@ Pseudo code for Encryption + Transmission
 ```python
 
 # Step 1: Level 1 encryption
-key_K = generate_aes_key()                              # 32-byte AES-256 key
+key_K = generate_aes_key()                              # AES key
 ciphertext = cipher_encrypt(b"HELLO", key_K)            # plaintext as bytes → ciphertext bytes
 
 # Step 2: Generate Secret Key S

@@ -8,7 +8,7 @@
 ## System Overview
 
 A two-level cryptographic system:
-1. **Level 1 – Crypto:** Plaintext → encrypted with AES-256 (or MHKC) → ciphertext
+1. **Level 1 – Crypto:** Plaintext → encrypted with AES (or MHKC) → ciphertext
 2. **Level 2 – Steganography:** Ciphertext chars are embedded at stencil-defined positions inside a large random character grid
 
 Decryption reverses this: extract chars from the grid using the stencil key → decrypt.
