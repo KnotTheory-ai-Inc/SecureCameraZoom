@@ -19,8 +19,8 @@
 def cipher_encrypt(plaintext: bytes, key_K: bytes) -> bytes:
     """
     Encrypt plaintext using AES-256-CBC (recommended) or MHKC.
-    - plaintext: raw bytes (e.g. b"HELLO")
-    - Returns: ciphertext as bytes
+    - Input: plaintext (bytes, e.g. b"HELLO"), key_K (bytes)
+    - Output: ciphertext as bytes
     """
 ```
 
@@ -32,22 +32,25 @@ def cipher_encrypt(plaintext: bytes, key_K: bytes) -> bytes:
 def generate_random_grid(rows: int, cols: int) -> Grid:
     """
     Fill a rows×cols grid with random byte values.
-    - Returns: Grid dataclass instance
+    - Input: rows (int), cols (int)
+    - Output: Grid dataclass instance
     """
 
 def embed_ciphertext(grid: Grid, ciphertext: str, secret_key: SecretKey) -> Grid:
     """
     Place each char of ciphertext into the grid using the Secret Key S from the paper.
-    - Returns: modified Grid (rand bytes in Grid replaced with ciphertext bytes based on SecretKey).
+    - Input: Grid, ciphertext (str), secret_key (SecretKey)
+    - Output: modified Grid (rand bytes in Grid replaced with ciphertext bytes based on SecretKey).
     - Note: Grid size shall remain same
     """
 
 def grid_to_bytestream(grid: Grid) -> bytes:
     """
     Flatten the 2D grid into a byte stream for transmission.
+    - Input: grid (Grid, ciphertext-embedded)
+    - Output: bytes object.
     - Implementation: b''.join(grid.data)  — each row is already a bytearray.
     - Note: Equivalent byte index: grid.data[row][col] == bytestream[row * cols + col]
-    - Returns: bytes object.
     """
 ```
 
