@@ -143,6 +143,12 @@ pip install -r requirements.txt
 > python -m pip install -r requirements.txt
 > ```
 
+**3. Run tests**
+
+```bash
+python -m pytest test/ -v
+```
+
 ---
 
 > For the full phased Roadmap and task checklist, see [Implementation_checklist.md](Implementation_checklist.md).
