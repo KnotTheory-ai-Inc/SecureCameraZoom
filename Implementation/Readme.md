@@ -82,4 +82,73 @@ Using Classical decryption schemes: MHKC/AES with crypto secret key K
 
 "Xk9mP" → [Decryption] → "HELLO"
 
+---
 
+## Dependencies
+
+| Library | Purpose |
+|---|---|
+| `PyCryptodome` (Python) | AES encryption/decryption — for PoC implementation |
+| `pytest` | Unit testing, Integration testing |
+
+---
+
+### Crypto-libray choice for Python implementation
+
+Possible open source crypto-libraries: `PyCryptodome` and `cryptography` (PyCA).
+
+- **`cryptography` (PyCA)** : it is backed by OpenSSL. It also uses `cffi` as its C binding layer — making it a natural fit for Python based wrapping layers on C in the final library.
+
+- **`PyCryptodome`** : The API is cleaner and more readable (`pad`/`unpad` built-in, compact one-liner encrypt/decrypt), hence good readability. Suits best for reference implementation as a part of test system to challenge the library.
+
+- **Final decision:** `PyCryptodome` for the Python proof of concept/reference implementation.
+
+---
+
+### Installation and usage
+
+**0. Clone the repo and navigate to Implementation**
+
+```bash
+git clone <repo-url>
+cd SecureCameraZoom/Implementation
+```
+
+**1. Create and activate a virtual environment(optional)**
+
+```bash
+python -m venv .venv
+```
+
+> **Note:** `venv` is built into Python 3.3+ — no separate installation needed. Exception: Some Ubuntu/Debian Linux might require `sudo apt install python3-venv` first.
+
+Windows:
+```bash
+.venv\Scripts\activate
+```
+
+Linux:
+```bash
+source .venv/bin/activate
+```
+
+**2. Install dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+> If `pip` is not on PATH (System Environment variable), use:
+> ```bash
+> python -m pip install -r requirements.txt
+> ```
+
+**3. Run tests**
+
+```bash
+python -m pytest test/ -v
+```
+
+---
+
+> For the full phased Roadmap and task checklist, see [Implementation_checklist.md](Implementation_checklist.md).
