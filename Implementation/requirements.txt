@@ -3,3 +3,5 @@
 pycryptodome        # AES encryption/decryption
 pytest              # Unit and integration testing
 pytest-cov          # Test coverage reporting
+pytest-html         # HTML test report generation
+invoke              # Task runner (inv build / test / clean)
