@@ -26,5 +26,21 @@ jobs:
       - name: Install dependencies
         run: pip install -r Implementation/requirements.txt
 
+      - name: Build wheel
+        working-directory: Implementation
+        run: inv build
+
       - name: Run tests
-        run: pytest Implementation/test
+        working-directory: Implementation
+        run: inv test
+
+      - name: Upload test report
+        if: always()  # upload always
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: Implementation/build/report.html
+
+      - name: Clean build artifacts
+        working-directory: Implementation
+        run: inv clean
