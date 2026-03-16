@@ -132,7 +132,7 @@ Linux:
 source .venv/bin/activate
 ```
 
-**2. Install dependencies**
+**2. Install dependencies(To be executed first time and once)**
 
 ```bash
 pip install -r requirements.txt
@@ -143,11 +143,42 @@ pip install -r requirements.txt
 > python -m pip install -r requirements.txt
 > ```
 
-**3. Run tests**
+**3. Build and run tests**
 
 ```bash
-python -m pytest test/ -v
+inv build   # build .whl → build/dist/ 
+inv test    # run all tests (unit + integration) on built lib
+inv clean   # remove build output
 ```
+
+> Individual test targets: `inv test-unit`, `inv test-integration`
+
+---
+
+## Project tooling files
+
+### `pyproject.toml` — Package definition
+
+Tells `pip` the project config and how to build it.
+
+```
+pyproject.toml
+├── [build-system]    — which build backend to use (setuptools)
+├── [project]         — name, version, python version, dependencies
+└── [tool.setuptools] — where the source packages live (src/python)
+```
+
+---
+
+### `tasks.py` — Task runner (`inv` commands)
+
+Defines custom CLI commands using the [`invoke`](https://www.pyinvoke.org/) library.
+
+---
+
+### `conftest.py` — pytest configuration
+
+Automatically loaded by pytest before any test runs. Locates the built wheel in `build/dist/*.whl` and makes it available for import in test files.
 
 ---
 
