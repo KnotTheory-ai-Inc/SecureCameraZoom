@@ -99,7 +99,7 @@ Possible open source crypto-libraries: `PyCryptodome` and `cryptography` (PyCA).
 
 - **`cryptography` (PyCA)** : it is backed by OpenSSL. It also uses `cffi` as its C binding layer — making it a natural fit for Python based wrapping layers on C in the final library.
 
-- **`PyCryptodome`** : The API is cleaner and more readable (`pad`/`unpad` built-in, compact one-liner encrypt/decrypt), hence good readability. Suits best for reference implementation as a part of test system to challenge the library.
+- **`PyCryptodome`** : The API is cleaner and more readable (`pad`/`unpad` built-in, compact one-liner encrypt/decrypt), hence good readability. Suits best for reference implementation as a part of test system to challenge the library. [PyCryptodome Documentation](https://pycryptodome.readthedocs.io/en/latest/)
 
 - **Final decision:** `PyCryptodome` for the Python proof of concept/reference implementation.
 
@@ -161,6 +161,8 @@ inv clean   # remove build output
 
 Tells `pip` the project config and how to build it.
 
+For more details, see the [Python Packaging User Guide on pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/).
+
 ```
 pyproject.toml
 ├── [build-system]    — which build backend to use (setuptools)
@@ -179,6 +181,8 @@ Defines custom CLI commands using the [`invoke`](https://www.pyinvoke.org/) libr
 ### `conftest.py` — pytest configuration
 
 Automatically loaded by pytest before any test runs. Locates the built wheel in `build/dist/*.whl` and makes it available for import in test files.
+
+For more details, see the [pytest documentation on conftest.py](https://docs.pytest.org/en/stable/reference/fixtures.html#conftest-py).
 
 ---
 
