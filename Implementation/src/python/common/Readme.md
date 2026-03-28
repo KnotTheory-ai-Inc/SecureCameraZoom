@@ -1,13 +1,15 @@
 # Common — Shared Data Structures
 
-> These classes could be shared across both `Encryption` and `Decryption` modules.  
+> These types are shared across `Encryption`, `Decryption`, and `keygen` modules.  
+> See [Developer Guide](../../Developer_Guide.md) for the full system overview.
 
 ---
 
-## File
+## Files
 
 | File | Responsibility |
 |---|---|
+| `constants.py` | AES key size and block size constants |
 | `classes.py` | `SecretKey` and `Grid` dataclasses |
 
 ---
