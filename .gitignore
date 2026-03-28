@@ -10,6 +10,11 @@ env/
 # pytest
 .pytest_cache/
 
+# Build output
+Implementation/build/
+dist/
+*.egg-info/
+
 # VS Code
 
 # C build artifacts
