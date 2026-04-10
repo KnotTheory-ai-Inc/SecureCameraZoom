@@ -10,3 +10,8 @@ dependencies = ["pycryptodome"]
 
 [tool.setuptools.packages.find]
 where = ["src/python"]
+namespaces = true
+
+[tool.setuptools]
+py-modules = ["stencil_lib"]
+package-dir = {"" = "src/python"}

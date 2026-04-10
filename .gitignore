@@ -24,3 +24,6 @@ dist/
 
 # GitHub
 .github/agents/
+.github/prompts/
+.github/*.md
+.github/instructions/
