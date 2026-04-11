@@ -90,6 +90,7 @@ Using Classical decryption schemes: MHKC/AES with crypto secret key K
 |---|---|
 | `PyCryptodome` (Python) | AES encryption/decryption — for PoC implementation |
 | `pytest` | Unit testing, Integration testing |
+| `invoke` | Task runner (`inv build`, `inv test`, `inv clean`) |
 
 ---
 
@@ -151,7 +152,7 @@ inv test    # run all tests (unit + integration) on built lib
 inv clean   # remove build output
 ```
 
-> Individual test targets: `inv test-unit`, `inv test-integration`
+> Individual test targets: `inv test_unit`, `inv test_integration`
 
 ---
 

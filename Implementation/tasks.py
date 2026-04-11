@@ -13,7 +13,7 @@ def build(context):
     shutil.rmtree("build/dist", ignore_errors=True)
     context.run(f"{_pip} wheel --no-deps . --wheel-dir build/dist/")
     shutil.rmtree("build/lib", ignore_errors=True)
-    print("Library built → build/dist/")
+    print("Library built -> build/dist/")
 
 
 @task
