@@ -9,7 +9,7 @@ class Algo(Enum):
     CAESAR = "caesar"
     VIGENERE = "vigenere"
 
-class Key(ABC):
+class CipherConfig(ABC):
     """Abstract base class for all cipher keys.
 
     Each concrete subclass bundles every algorithm-specific parameter so
@@ -17,21 +17,11 @@ class Key(ABC):
     """
 
 
-class AESKey(Key):
+class AESConfig(CipherConfig):
     """Key + mode config for AES encryption/decryption.
-
+    
     mode_params captures any extra keyword arguments required by the
-    chosen AES mode and is forwarded verbatim to AES.new():
-
-        AES.MODE_ECB  — no extra params
-        AES.MODE_CBC  — iv=<16-byte IV>
-        AES.MODE_CTR  — nonce=<bytes>
-        AES.MODE_GCM  — nonce=<bytes>
-
-    Example::
-
-        AESKey(key_bytes, AES.MODE_CBC, iv=os.urandom(16))
-        AESKey(key_bytes, AES.MODE_CTR, nonce=os.urandom(8))
+    chosen AES mode and is forwarded to AES.new():
 
     Attributes:
         raw_key     : AES key bytes (16, 24, or 32 bytes).
@@ -47,7 +37,7 @@ class AESKey(Key):
         self.mode_params: dict = mode_params
 
 
-class CaesarKey(Key):
+class CaesarConfig(CipherConfig):
     """Key for the Caesar byte-shift cipher.
 
     Attributes:
@@ -60,7 +50,7 @@ class CaesarKey(Key):
         self.shift = shift
 
 
-class VigenereKey(Key):
+class VigenereConfig(CipherConfig):
     """Key for the Vigenere byte-shift cipher.
 
     Attributes:

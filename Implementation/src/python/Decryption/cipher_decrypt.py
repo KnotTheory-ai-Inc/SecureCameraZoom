@@ -1,30 +1,30 @@
 from Crypto.Cipher import AES
-from common.classes import AESKey, CaesarKey, Key, VigenereKey
+from common.classes import AESConfig, CaesarConfig, CipherConfig, VigenereConfig
 
 
-def cipher_decrypt(ciphertext: bytes, key: Key) -> bytes:
+def cipher_decrypt(ciphertext: bytes, key: CipherConfig) -> bytes:
     """
     Decrypt ciphertext using the algorithm encoded in *key*.
 
     Args:
         ciphertext : bytes to decrypt.
-        key        : A Key subclass instance that carries all algorithm-
+        key        : A CipherConfig subclass instance that carries all algorithm-
                      specific parameters:
-                       AESKey      — raw_key, mode, **mode_params (iv, nonce, ...)
-                       CaesarKey   — shift (int, 0-255)
-                       VigenereKey — keyword (bytes)
+                       AESConfig      — raw_key, mode, **mode_params (iv, nonce, ...)
+                       CaesarConfig   — shift (int, 0-255)
+                       VigenereConfig — keyword (bytes)
 
     Returns:
         Plaintext as bytes.
     """
-    if isinstance(key, AESKey):
+    if isinstance(key, AESConfig):
         return _aes_decrypt(ciphertext, key.raw_key, key.mode, key.mode_params)
-    elif isinstance(key, CaesarKey):
+    elif isinstance(key, CaesarConfig):
         return _caesar_decrypt(ciphertext, key.shift)
-    elif isinstance(key, VigenereKey):
+    elif isinstance(key, VigenereConfig):
         return _vigenere_decrypt(ciphertext, key.keyword)
     else:
-        raise ValueError(f"Unsupported key type: {type(key).__name__}")
+        raise ValueError(f"Unsupported config type: {type(key).__name__}")
 
 
 def _aes_decrypt(ciphertext: bytes, raw_key: bytes, mode: int, mode_params: dict) -> bytes:
