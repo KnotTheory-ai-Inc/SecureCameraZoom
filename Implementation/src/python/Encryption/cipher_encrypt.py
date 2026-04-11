@@ -1,30 +1,30 @@
 from Crypto.Cipher import AES
-from common.classes import AESKey, CaesarKey, Key, VigenereKey
+from common.classes import AESConfig, CaesarConfig, CipherConfig, VigenereConfig
 
 
-def cipher_encrypt(plaintext: bytes, key: Key) -> bytes:
+def cipher_encrypt(plaintext: bytes, cfg: CipherConfig) -> bytes:
     """
     Encrypt plaintext using the algorithm encoded in *key*.
 
     Args:
         plaintext : bytes to encrypt.
-        key       : A Key subclass instance that carries all algorithm-
+        key       : A CipherConfig subclass instance that carries all algorithm-
                     specific parameters:
-                      AESKey      — raw_key, mode, **mode_params (iv, nonce, ...)
-                      CaesarKey   — shift (int, 0-255)
-                      VigenereKey — keyword (bytes)
+                      AESConfig      — raw_key, mode, **mode_params (iv, nonce, ...)
+                      CaesarConfig   — shift (int, 0-255)
+                      VigenereConfig — keyword (bytes)
 
     Returns:
         Ciphertext as bytes.
     """
-    if isinstance(key, AESKey):
-        return _aes_encrypt(plaintext, key.raw_key, key.mode, key.mode_params)
-    elif isinstance(key, CaesarKey):
-        return _caesar_encrypt(plaintext, key.shift)
-    elif isinstance(key, VigenereKey):
-        return _vigenere_encrypt(plaintext, key.keyword)
+    if isinstance(cfg, AESConfig):
+        return _aes_encrypt(plaintext, cfg.raw_key, cfg.mode, cfg.mode_params)
+    elif isinstance(cfg, CaesarConfig):
+        return _caesar_encrypt(plaintext, cfg.shift)
+    elif isinstance(cfg, VigenereConfig):
+        return _vigenere_encrypt(plaintext, cfg.keyword)
     else:
-        raise ValueError(f"Unsupported key type: {type(key).__name__}")
+        raise ValueError(f"Unsupported config type: {type(cfg).__name__}")
 
 
 def _aes_encrypt(plaintext: bytes, raw_key: bytes, mode: int, mode_params: dict) -> bytes:
