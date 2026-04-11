@@ -1,35 +1,34 @@
 from Crypto.Cipher import AES
-from common.classes import Algo
+from common.classes import AESKey, CaesarKey, Key, VigenereKey
 
 
-def cipher_encrypt(plaintext: bytes, key_K, algo: Algo = Algo.AES, aes_mode: int = AES.MODE_ECB) -> bytes:
+def cipher_encrypt(plaintext: bytes, key: Key) -> bytes:
     """
-    Encrypt plaintext using the specified algorithm.
+    Encrypt plaintext using the algorithm encoded in *key*.
 
     Args:
         plaintext : bytes to encrypt.
-        key_K     : key material — type depends on algo:
-                      AES      -> bytes (16/24/32 bytes)
-                      CAESAR   -> int (shift, 0-255)
-                      VIGENERE -> bytes (repeating keyword)
-        algo      : Algo enum member selecting the cipher.
-        aes_mode  : AES block-cipher mode (ignored for non-AES algos).
+        key       : A Key subclass instance that carries all algorithm-
+                    specific parameters:
+                      AESKey      — raw_key, mode, **mode_params (iv, nonce, ...)
+                      CaesarKey   — shift (int, 0-255)
+                      VigenereKey — keyword (bytes)
 
     Returns:
         Ciphertext as bytes.
     """
-    if algo == Algo.AES:
-        return _aes_encrypt(plaintext, key_K, aes_mode)
-    elif algo == Algo.CAESAR:
-        return _caesar_encrypt(plaintext, key_K)
-    elif algo == Algo.VIGENERE:
-        return _vigenere_encrypt(plaintext, key_K)
+    if isinstance(key, AESKey):
+        return _aes_encrypt(plaintext, key.raw_key, key.mode, key.mode_params)
+    elif isinstance(key, CaesarKey):
+        return _caesar_encrypt(plaintext, key.shift)
+    elif isinstance(key, VigenereKey):
+        return _vigenere_encrypt(plaintext, key.keyword)
     else:
-        raise ValueError(f"Unsupported algorithm: {algo}")
+        raise ValueError(f"Unsupported key type: {type(key).__name__}")
 
 
-def _aes_encrypt(plaintext: bytes, key_K: bytes, mode: int) -> bytes:
-    cipher = AES.new(key_K, mode)
+def _aes_encrypt(plaintext: bytes, raw_key: bytes, mode: int, mode_params: dict) -> bytes:
+    cipher = AES.new(raw_key, mode, **mode_params)
     return cipher.encrypt(plaintext)
 
 
