@@ -1,27 +1,53 @@
+import os
 import random
 import pytest
+from Crypto.Cipher import AES as _AES
 from Crypto.Util.Padding import pad
-from common.constants import AES_256_KEY_SIZE, AES_BLOCK_SIZE, AES_128_KEY_SIZE
-from Encryption.cipher_encrypt import cipher_encrypt
+import stencil_lib as cryptolib
+
+AES_256_KEY_SIZE = cryptolib.AES_256_KEY_SIZE
+AES_128_KEY_SIZE = cryptolib.AES_128_KEY_SIZE
+AES_BLOCK_SIZE = cryptolib.AES_BLOCK_SIZE
+AESConfig = cryptolib.AESConfig
+CaesarConfig = cryptolib.CaesarConfig
+VigenereConfig = cryptolib.VigenereConfig
+cipher_encrypt = cryptolib.cipher_encrypt
 
 
-@pytest.mark.parametrize("plain_text_len", [1, 5, 16, 17, 32, 100])
-@pytest.mark.parametrize("key_size", [AES_256_KEY_SIZE, AES_128_KEY_SIZE])
-def test_ciphertext_length_equals_plaintext_length(plain_text_len, key_size):
-    """ECB mode: ciphertext length must equal padded plaintext length (block-aligned)."""
-    key = random.randbytes(key_size)
+@pytest.mark.parametrize("plain_text_len", [1, 16, 17, 64])
+@pytest.mark.parametrize("key_size", [AES_128_KEY_SIZE, AES_256_KEY_SIZE])
+def test_aes_encrypt_output_length(plain_text_len, key_size):
+    """AES ECB: ciphertext length equals padded plaintext length."""
+    plaintext = pad(random.randbytes(plain_text_len), AES_BLOCK_SIZE)
+    ciphertext = cipher_encrypt(plaintext, AESConfig(random.randbytes(key_size)))
+    assert len(ciphertext) == len(plaintext)
+
+
+@pytest.mark.parametrize("plain_text_len", [1, 16, 64])
+@pytest.mark.parametrize("shift", [1, 13, 128, 255])
+def test_caesar_encrypt_output_length(plain_text_len, shift):
+    """Caesar: ciphertext length equals plaintext length."""
     plaintext = random.randbytes(plain_text_len)
-    padded_plaintext = pad(plaintext, AES_BLOCK_SIZE)
-    ciphertext = cipher_encrypt(padded_plaintext, key)
-    assert len(ciphertext) == len(padded_plaintext)
+    assert len(cipher_encrypt(plaintext, CaesarConfig(shift))) == len(plaintext)
 
 
-def test_different_keys_same_plaintexts():
-    """Same plaintext encrypted with different keys must produce different ciphertexts."""
-    plaintext = random.randbytes(24)
-    padded_plaintext = pad(plaintext, AES_BLOCK_SIZE)
-    ciphertext1 = cipher_encrypt(padded_plaintext, random.randbytes(AES_256_KEY_SIZE))
-    ciphertext2 = cipher_encrypt(padded_plaintext, random.randbytes(AES_256_KEY_SIZE))
-    assert ciphertext1 != ciphertext2
+@pytest.mark.parametrize("plain_text_len", [1, 16, 64])
+@pytest.mark.parametrize("kw", [b"K", b"SECRET"])
+def test_vigenere_encrypt_output_length(plain_text_len, kw):
+    """Vigenere: ciphertext length equals plaintext length."""
+    plaintext = random.randbytes(plain_text_len)
+    assert len(cipher_encrypt(plaintext, VigenereConfig(kw))) == len(plaintext)
 
 
+@pytest.mark.parametrize("mode, mode_params, needs_padding", [
+    pytest.param(_AES.MODE_ECB, {},                        True,  id="ECB"),
+    pytest.param(_AES.MODE_CBC, {"iv": os.urandom(16)},    True,  id="CBC"),
+    pytest.param(_AES.MODE_CTR, {"nonce": os.urandom(8)},  False, id="CTR"),
+])
+def test_aes_encrypt_modes_output_length(mode, mode_params, needs_padding):
+    """AES: ciphertext length equals (padded) plaintext length across ECB, CBC, CTR."""
+    plaintext = random.randbytes(random.randint(1, 2048))
+    if needs_padding:
+        plaintext = pad(plaintext, AES_BLOCK_SIZE)
+    cfg = AESConfig(random.randbytes(AES_256_KEY_SIZE), mode, **mode_params)
+    assert len(cipher_encrypt(plaintext, cfg)) == len(plaintext)

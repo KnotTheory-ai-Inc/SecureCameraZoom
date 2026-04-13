@@ -18,3 +18,12 @@ dist/
 # VS Code
 
 # C build artifacts
+
+# Git
+.git/
+
+# GitHub
+.github/agents/
+.github/prompts/
+.github/*.md
+.github/instructions/
