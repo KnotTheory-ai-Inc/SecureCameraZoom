@@ -7,8 +7,8 @@
 ## Roadmap
 
 ### Phase 1 — Python based proof of concept *(current)*
-- [ ] AES encryption using PyCryptodome
-- [ ] AES decryption using PyCryptodome
+- [ ] Level-1 encryption
+- [ ] Level-1 decryption
 - [ ] Random grid generation and ciphertext embedding
 - [ ] Grid extraction and ciphertext recovery
 - [ ] SecretKey dataclass, serialization/deserialization
@@ -24,10 +24,9 @@
 
 
 ### Phase 4 — Integration and CI Pipeline
-- [ ] Build C library (cmake + ninja) via GitHub Actions
 - [ ] Install Python deps + run pytest via GitHub Actions
-- [ ] Integration tests: Python test suite calls C library via cffi
+- [ ] Build python library
+- [ ] Unit and Integration tests: Python test suite
 - [ ] Coverage reporting
-- [ ] cffi bindings to call C library from Python
 
 ---

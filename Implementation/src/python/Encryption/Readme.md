@@ -56,34 +56,4 @@ def grid_to_bytestream(grid: Grid) -> bytes:
 
 ---
 
-## Sender Flow
-
-Pseudo code for Encryption + Transmission
-
-```python
-
-# Step 1: Level 1 encryption
-key_K = generate_aes_key()                              # AES key
-ciphertext = cipher_encrypt(b"HELLO", key_K)            # plaintext as bytes → ciphertext bytes
-
-# Step 2: Generate Secret Key S
-stencil_coords = generate_stencil_coords(len(ciphertext), rows=r, cols=c)
-sigma = generate_permutation(len(ciphertext)) # random permutations σ  
-secret_key = generate_secret_key(
-    stencil_coords=stencil_coords,
-    partition=[1, 1, 3],
-    permutation=sigma,
-    reading_order="top-bottom-left-right",
-    crypto_key_K=key_K
-)
-
-# Step 3: Build grid and embed using Secret Key S
-grid = generate_random_grid(rows=r, cols=c)
-grid = embed_ciphertext(grid, ciphertext, secret_key)
-
-# Step 4: Transmit
-# send grid to receiver as bytestream(Mode A)
-byte_stream = grid_to_bytestream(grid)
-# secure way of key exchange: TODO: Key exchange Protocol (or) secure key transmission to be investigated
-key_exchange(serialize_secret_key(secret_key))
-```
+> For the full Sender Flow (how these functions are orchestrated end-to-end), see [stencil_app/Readme.md](../../../stencil_app/Readme.md).
