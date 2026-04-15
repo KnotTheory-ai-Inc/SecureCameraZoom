@@ -1,16 +1,14 @@
 import random
 import pytest
 from Crypto.Util.Padding import pad, unpad
-import stencil_lib as cryptolib
+import stencil_lib
+from utils.classes import AESConfig, CaesarConfig, VigenereConfig
 
-AES_256_KEY_SIZE = cryptolib.AES_256_KEY_SIZE
-AES_128_KEY_SIZE = cryptolib.AES_128_KEY_SIZE
-AES_BLOCK_SIZE = cryptolib.AES_BLOCK_SIZE
-AESConfig = cryptolib.AESConfig
-CaesarConfig = cryptolib.CaesarConfig
-VigenereConfig = cryptolib.VigenereConfig
-cipher_encrypt = cryptolib.cipher_encrypt
-cipher_decrypt = cryptolib.cipher_decrypt
+AES_256_KEY_SIZE = stencil_lib.AES_256_KEY_SIZE
+AES_128_KEY_SIZE = stencil_lib.AES_128_KEY_SIZE
+AES_BLOCK_SIZE = stencil_lib.AES_BLOCK_SIZE
+cipher_encrypt = stencil_lib.cipher_encrypt
+cipher_decrypt = stencil_lib.cipher_decrypt
 
 
 @pytest.mark.parametrize("key_size", [AES_128_KEY_SIZE, AES_256_KEY_SIZE])
