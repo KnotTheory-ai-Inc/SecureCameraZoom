@@ -1,6 +1,6 @@
-# The Overall Workflow of the Paper-Pencil Crypto-scheme
+# The Overall Dataflow of the Paper-Pencil Crypto-scheme
 
-![The Workflow](Paper-Pencil-Block-Diag.jpeg)
+![The Dataflow](Paper-Pencil-Block-Diag.jpeg)
 
 # Detailed Workflow with an example
 
@@ -81,6 +81,14 @@ Secret Key S = {
 Using Classical decryption schemes: MHKC/AES with crypto secret key K
 
 "Xk9mP" → [Decryption] → "HELLO"
+
+---
+
+# Detailed architecture for implementation
+
+<p align="center">
+  <img src="Stencil_system_architecture.jpeg" alt="Centered image" style="max-width: 150%;">
+</p>
 
 ---
 

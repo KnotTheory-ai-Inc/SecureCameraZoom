@@ -43,15 +43,6 @@ def embed_ciphertext(grid: Grid, ciphertext: str, secret_key: SecretKey) -> Grid
     - Output: modified Grid (rand bytes in Grid replaced with ciphertext bytes based on SecretKey).
     - Note: Grid size shall remain same
     """
-
-def grid_to_bytestream(grid: Grid) -> bytes:
-    """
-    Flatten the 2D grid into a byte stream for transmission.
-    - Input: grid (Grid, ciphertext-embedded)
-    - Output: bytes object.
-    - Implementation: b''.join(grid.data)  — each row is already a bytearray.
-    - Note: Equivalent byte index: grid.data[row][col] == bytestream[row * cols + col]
-    """
 ```
 
 ---
