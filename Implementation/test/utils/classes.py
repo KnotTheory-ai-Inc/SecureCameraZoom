@@ -3,20 +3,20 @@ from stencil_lib import CipherConfig
 
 class AESConfig(CipherConfig):
     algo = "aes"
-    def __init__(self, raw_key: bytes, mode: int = None, **mode_params):
+    def __init__(self, key: bytes, mode: int = None, **mode_params):
         from Crypto.Cipher import AES
         self.parameters = {
-            "raw_key": raw_key,
+            "key": key,
             "mode": mode if mode is not None else AES.MODE_ECB,
             "mode_params": mode_params,
         }
     def encrypt(self, plaintext: bytes, *args, **kwargs) -> bytes:
         from Crypto.Cipher import AES
-        cipher = AES.new(self.parameters["raw_key"], self.parameters["mode"], **self.parameters["mode_params"])
+        cipher = AES.new(self.parameters["key"], self.parameters["mode"], **self.parameters["mode_params"])
         return cipher.encrypt(plaintext)
     def decrypt(self, ciphertext: bytes, *args, **kwargs) -> bytes:
         from Crypto.Cipher import AES
-        cipher = AES.new(self.parameters["raw_key"], self.parameters["mode"], **self.parameters["mode_params"])
+        cipher = AES.new(self.parameters["key"], self.parameters["mode"], **self.parameters["mode_params"])
         return cipher.decrypt(ciphertext)
 
 
