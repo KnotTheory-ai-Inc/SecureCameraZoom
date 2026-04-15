@@ -26,6 +26,15 @@ It is a dedicated research space for implementing different grid transmission me
 ## `bytestream_protocol.py`
 
 ```python
+def grid_to_bytestream(grid: Grid) -> bytes:
+    """
+    Flatten the 2D grid into a byte stream for transmission.
+    - Input: grid (Grid, ciphertext-embedded)
+    - Output: bytes object.
+    - Implementation: b''.join(grid.data)  — each row is already a bytearray.
+    - Note: Equivalent byte index: grid.data[row][col] == bytestream[row * cols + col]
+    """
+
 def transmit(bytestream: bytes) -> None:
     """
     Transmit the grid bytestream to the receiver (Mode A).
