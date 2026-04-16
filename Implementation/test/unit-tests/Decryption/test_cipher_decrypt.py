@@ -3,16 +3,12 @@ import random
 import pytest
 from Crypto.Cipher import AES as _AES
 from Crypto.Util.Padding import pad
-import stencil_lib as cryptolib
+import stencil_lib
+from utils.classes import AESConfig, CaesarConfig, VigenereConfig
+from utils.constants import AES_128_KEY_SIZE, AES_256_KEY_SIZE, AES_BLOCK_SIZE
 
-AES_256_KEY_SIZE = cryptolib.AES_256_KEY_SIZE
-AES_128_KEY_SIZE = cryptolib.AES_128_KEY_SIZE
-AES_BLOCK_SIZE = cryptolib.AES_BLOCK_SIZE
-AESConfig = cryptolib.AESConfig
-CaesarConfig = cryptolib.CaesarConfig
-VigenereConfig = cryptolib.VigenereConfig
-cipher_encrypt = cryptolib.cipher_encrypt
-cipher_decrypt = cryptolib.cipher_decrypt
+cipher_encrypt = stencil_lib.cipher_encrypt
+cipher_decrypt = stencil_lib.cipher_decrypt
 
 
 @pytest.mark.parametrize("plain_text_len", [1, 16, 17, 64])

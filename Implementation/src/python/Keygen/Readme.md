@@ -8,25 +8,9 @@
 
 | File | Responsibility |
 |---|---|
-| `aes_keygen.py` | AES key derivation — `generate_aes_key()` using HKDF + `os.urandom` |
 | `stencil_keygen.py` | Stencil coordinate generation, permutation generation, `SecretKey` assembly |
 
-> **Pattern for future ciphers:** each new cipher (Caesar, Vigenère, etc.) adds its own `<cipher>_keygen.py` here. `stencil_keygen.py` is cipher-agnostic and stays unchanged.
-
----
-
-## `aes_keygen.py`
-
-```python
-def generate_aes_key(key_size: int) -> bytes:
-    """
-    Derive a cryptographically secure AES key.
-    - Uses os.urandom() as entropy source (CSPRNG)
-    - Conditions entropy through HKDF (RFC 5869) before use as key
-    - Input: key_size (int) — AES_128_KEY_SIZE or AES_256_KEY_SIZE from constants
-    - Output: key bytes of length key_size
-    """
-```
+> **Pattern for Key material:** for each new cipher (Caesar, Vigenère, etc.) user will provide encrypt impl, decrypt impl and parameters. `stencil_keygen.py` will generate key for steganographic crypto system.
 
 ---
 

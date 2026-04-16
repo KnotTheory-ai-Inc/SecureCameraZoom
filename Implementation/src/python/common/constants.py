@@ -1,4 +1,1 @@
-AES_BLOCK_SIZE = 16
-AES_256_KEY_SIZE = 32
-AES_128_KEY_SIZE = 16
-AES_192_KEY_SIZE = 24
+# Constants used across the project
