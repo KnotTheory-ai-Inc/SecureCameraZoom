@@ -18,13 +18,6 @@
 
 ```python
 
-def bytestream_to_grid(bytestream: bytes, rows: int, cols: int) -> Grid:
-    """
-    Convert a byte stream back into a 2D grid.
-    - Input: bytestream (bytes), rows (int), cols (int)
-    - Output: Grid dataclass instance.
-    """
-
 def extract_ciphertext(grid: Grid, secret_key: SecretKey) -> bytes:
     """
     Extract ciphertext bytes from the grid using Secret Key S.
@@ -33,19 +26,5 @@ def extract_ciphertext(grid: Grid, secret_key: SecretKey) -> bytes:
     """
 ```
 
----
-
-## `cipher_decrypt.py`
-
-```python
-def cipher_decrypt(ciphertext: bytes, key_K: bytes) -> bytes:
-    """
-    Decrypt ciphertext using AES or MHKC.
-    - Input: ciphertext (bytes), key_K (bytes)
-    - Output: plaintext as bytes
-    """
-```
-
----
 
 > For the full Receiver Flow (how these functions are orchestrated end-to-end), see [stencil_app/Readme.md](../../../stencil_app/Readme.md).
