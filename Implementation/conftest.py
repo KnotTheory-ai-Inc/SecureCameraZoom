@@ -13,5 +13,5 @@ if not _lib:
 # Install the wheel so sub-packages (common, Encryption, Decryption) are importable
 subprocess.check_call([sys.executable, "-m", "pip", "install", "--quiet", "--force-reinstall", _lib[0]])
 
-# Make packages in test directory importable (e.g. utils.classes)
+# Make test/utils/ importable (e.g. utils.classes, utils.constants)
 sys.path.insert(0, os.path.join(_here, "test"))
