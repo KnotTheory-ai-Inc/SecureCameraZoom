@@ -3,10 +3,8 @@ import pytest
 from Crypto.Util.Padding import pad, unpad
 import stencil_lib
 from utils.classes import AESConfig, CaesarConfig, VigenereConfig
+from utils.constants import AES_128_KEY_SIZE, AES_256_KEY_SIZE, AES_BLOCK_SIZE
 
-AES_256_KEY_SIZE = stencil_lib.AES_256_KEY_SIZE
-AES_128_KEY_SIZE = stencil_lib.AES_128_KEY_SIZE
-AES_BLOCK_SIZE = stencil_lib.AES_BLOCK_SIZE
 cipher_encrypt = stencil_lib.cipher_encrypt
 cipher_decrypt = stencil_lib.cipher_decrypt
 

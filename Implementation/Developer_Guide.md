@@ -33,24 +33,20 @@ Both modes share all modules **except** the extraction step.
 src/python/                            # modules/units to build a library
   common/
     constants.py                       # general constants
-    classes.py                         # Key base class + AESKey, CaesarKey, VigenereKey
+    classes.py                         # Abstract class and other common class types
   Encryption/
-    cipher_encrypt.py                  # Level 1: cipher_encrypt(plaintext, key: Key)
+    cipher_encrypt.py                  # Level 1: Run chosen algo: cipher_encrypt(plaintext, cfg)
     steganography_encrypt.py           # Level 2: Grid generation and ciphertext embedding (TODO)
   Keygen/
-    # future: aes_keygen.py, caesar_keygen.py, vigenere_keygen.py, stencil_keygen.py
+    # future: stencil_keygen.py
   Decryption/
-    cipher_decrypt.py                  # Level 1: cipher_decrypt(ciphertext, key: Key)
-    steganography_decrypt.py           # Level 2: Byte-stream grid extraction and ciphertext recovery (TODO)
-  KeyExchange/
-    # future: secret_key_serializer.py, dh_exchange.py, tls_exchange.py, ...
-  CommunicationProtocol/
-    # future: bytestream_protocol.py (Mode A), ocr_protocol.py (Mode B), ...
+    cipher_decrypt.py                  # Level 1: Run chosen algo: cipher_decrypt(ciphertext, cfg)
+    steganography_decrypt.py           # Level 2: Byte-stream grid extraction and ciphertext
 
-stencil_app_demo/python/               # Application layer — orchestration only (demo notebook)
-  stencil_app.ipynb                    # Demo: end-to-end walkthrough notebook
-  CommunicationProtocol/               # (stub)
-  KeyExchange/                         # (stub)
+stencil_system/python/               # Application layer — orchestration of entire crypto system
+  stencil_system.ipynb                    # Demo: end-to-end walkthrough notebook
+  CommunicationProtocol/               # To be done
+  KeyExchange/                         # To be done
 
 test/
   unit-tests/
