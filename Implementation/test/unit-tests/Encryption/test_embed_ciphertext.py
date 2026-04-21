@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Quick verification of embed_ciphertext logic."""
+"""Quick verification of steganography_encrypt logic."""
 
 import random
 import pytest
 from src.python.common.classes import Grid, Stencil, SecretKey, GridDimension, CipherConfig
-from src.python.Encryption.steganography_encrypt import embed_ciphertext
+from src.python.Encryption.steganography_encrypt import steganography_encrypt
 
 # Mock CipherConfig for testing
 class MockConfig(CipherConfig):
@@ -23,7 +23,7 @@ GRID_ROWS, GRID_COLS = 20, 20
 
 
 # Basic Test case
-def test_embed_ciphertext_basic():
+def test_steganography_encrypt_basic():
 
     # Stencil 0: 2 coords → ciphertext[0:2]
     # Stencil 1: 3 coords → ciphertext[2:5]
@@ -45,7 +45,7 @@ def test_embed_ciphertext_basic():
     )
 
     # Embed
-    result = embed_ciphertext(grid, ciphertext, secret_key)
+    result = steganography_encrypt(grid, ciphertext, secret_key)
 
     # Expected: each stencil coord holds the corresponding ciphertext byte
     assert result.data[0][0] == ciphertext[0], f"Expected {ciphertext[0]} at (0,0), got {result.data[0][0]}"
@@ -57,7 +57,7 @@ def test_embed_ciphertext_basic():
 
 @pytest.mark.parametrize("num_partitions", [2, 3, 5])
 @pytest.mark.parametrize("n", [5, 25, 70, 100])
-def test_embed_ciphertext_parametrized(n, num_partitions):
+def test_steganography_encrypt_parametrized(n, num_partitions):
     # Generate row-major coords from the common grid, take first n
     all_coords = [(r, c) for r in range(GRID_ROWS) for c in range(GRID_COLS)][:n]
 
@@ -80,7 +80,7 @@ def test_embed_ciphertext_parametrized(n, num_partitions):
         cipher_cfg=MockConfig()
     )
 
-    result = embed_ciphertext(grid, ciphertext, secret_key)
+    result = steganography_encrypt(grid, ciphertext, secret_key)
 
     # Verify every embedded byte matches the ciphertext at its coord
     for idx, (row, col) in enumerate(all_coords):

@@ -33,7 +33,7 @@ Quick summary (per paper §3 — order matters):
 - `generate_permutation(n)` → σ, a random shuffle of ciphertext byte indices `[0..n-1]`
 - `σ[i] = j` means: after splitting, place `ciphertext[j]` at `stencil_coords[i]`
 - Store σ in `SecretKey.permutation`
-- Sender uses σ when calling `embed_ciphertext()`
+- Sender uses σ when calling `steganography_encrypt()`
 - Receiver reconstructs: `ciphertext[σ[i]] = extracted[i]` (no inverse needed — σ is the direct index map)
 - For no scrambling, pass `list(range(n))` as σ (identity permutation)
 
