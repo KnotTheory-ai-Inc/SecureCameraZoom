@@ -42,7 +42,37 @@ def do_partitioning(ciphertext: bytes, partition: List[int]) -> List[bytes]:
     return partitioned_ciphertext
 
 
-def embed_ciphertext(grid: Grid, ciphertext: bytes, secret_key: SecretKey) -> Grid:
+def steganography_encrypt_preconditions(ciphertext: bytes, stencils, partition_list: List[int]) -> None:
+    """
+    Validate that ciphertext length and stencil partitions are compatible.
+
+    Args:
+        ciphertext    : bytes to embed.
+        stencils      : stencil groups used for embedding.
+        partition_list : partition sizes for each stencil.
+
+    Raises:
+        ValueError: if the total stencil length or per-stencil partition sizes are invalid.
+    """
+    total_length_all_stencils = sum(stencil.len for stencil in stencils)
+    if total_length_all_stencils != len(ciphertext):
+        raise ValueError(
+            f"Total stencil positions ({total_length_all_stencils}) must equal ciphertext length ({len(ciphertext)})"
+        )
+
+    if len(stencils) != len(partition_list):
+        raise ValueError(
+            f"Number of stencils ({len(stencils)}) must equal number of partition sizes ({len(partition_list)})"
+        )
+
+    for i, stencil in enumerate(stencils):
+        if stencil.len != partition_list[i]:
+            raise ValueError(
+                f"Stencil {i} length ({stencil.len}) does not match partition size ({partition_list[i]})"
+            )
+
+
+def steganography_encrypt(grid: Grid, ciphertext: bytes, secret_key: SecretKey) -> Grid:
     """
     Embed ciphertext bytes into the grid at stencil positions.
 
@@ -64,21 +94,10 @@ def embed_ciphertext(grid: Grid, ciphertext: bytes, secret_key: SecretKey) -> Gr
     partition_list = secret_key.partition_list
     obfuscated_grid = Grid(rows=grid.rows, cols=grid.cols, data=[bytearray(row) for row in grid.data])
 
-    # Validate: sum of all stencil sizes must equal ciphertext length
-    total_length_all_stencils = sum(stencil.len for stencil in stencils)
-    if total_length_all_stencils != len(ciphertext):
-        raise ValueError(
-            f"Total stencil positions ({total_length_all_stencils}) must equal ciphertext length ({len(ciphertext)})"
-        )
+    steganography_encrypt_preconditions(ciphertext, stencils, partition_list)
 
     # TODO: add permutation logic while embedding ciphertext into grid based on secret_key.permutation
 
-    # check the length of every stencil matches the corresponding partition
-    for i, stencil in enumerate(stencils):
-        if stencil.len != partition_list[i]:
-            raise ValueError(
-                f"Stencil {i} length ({stencil.len}) does not match partition size ({partition_list[i]})"
-            )
     partitioned_ciphertext = do_partitioning(ciphertext, partition_list)
 
     # Embed cipher text into the grid
@@ -89,3 +108,4 @@ def embed_ciphertext(grid: Grid, ciphertext: bytes, secret_key: SecretKey) -> Gr
             obfuscated_grid.data[row][col] = ciphertext_partition[j]
 
     return obfuscated_grid
+
