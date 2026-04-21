@@ -4,6 +4,11 @@ from stencil_lib import CipherConfig
 class AESConfig(CipherConfig):
     algo = "aes"
     def __init__(self, key: bytes, mode: int = None, **mode_params):
+        # mode: AES.MODE_ECB (default, no params), AES.MODE_CBC (iv=),
+        #        AES.MODE_CFB (iv=), AES.MODE_OFB (iv=), AES.MODE_CTR (nonce= or counter=),
+        #        AES.MODE_GCM (nonce=), AES.MODE_EAX (nonce=), AES.MODE_CCM (nonce=),
+        #        AES.MODE_SIV (nonce=), AES.MODE_OCB (nonce=), AES.MODE_OPENPGP (iv=)
+
         from Crypto.Cipher import AES
         self.parameters = {
             "key": key,

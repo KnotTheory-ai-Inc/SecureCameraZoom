@@ -1,0 +1,100 @@
+import random
+from typing import List
+from common.classes import Grid, SecretKey
+
+
+def generate_random_grid(m: int, n: int) -> Grid:
+    """
+    Fill a (m*n) grid with random byte values.
+
+    Args:
+        m : number of rows.
+        n : number of columns.
+
+    Returns:
+        data[row][col] : Grid
+    """
+    data = []
+    for _ in range(m):
+        rand_row = bytearray(random.randbytes(n))
+        data.append(rand_row)
+    return Grid(rows=m, cols=n, data=data)
+
+
+def do_partitioning(ciphertext: bytes, partition: List[int]) -> List[bytes]:
+    """
+    Partition ciphertext into groups based on the partition list.
+
+    Args:
+        ciphertext : bytes to partition.
+        partition  : list of integers specifying partition sizes 
+        (e.g. [1, 1, 3] means first 2 groups are 1 byte each, last group is 3 bytes).
+
+    Returns:
+        List of groups, each group is a bytes slice.
+    """
+    partitioned_ciphertext = []
+    index = 0
+    for p in partition:
+        partition_bytes = ciphertext[index:index+p]
+        partitioned_ciphertext.append(partition_bytes)
+        index += p
+    return partitioned_ciphertext
+
+
+def embed_ciphertext(grid: Grid, ciphertext: bytes, secret_key: SecretKey) -> Grid:
+    """
+    Embed ciphertext bytes into the grid at stencil positions.
+
+    For each stencil group i, place ciphertext bytes starting from offset sum(partition[:i]).
+    Each stencil position (row, col) receives one byte of ciphertext.
+
+    Args:
+        grid       : Grid to embed into.
+        ciphertext : bytes to embed.
+        secret_key : SecretKey with stencils and partition.
+
+    Returns:
+        Modified Grid with ciphertext hidden at stencil positions.
+
+    Raises:
+        ValueError: if total stencil positions != len(ciphertext).
+    """
+    stencils = secret_key.stencils
+    partition_list = secret_key.partition_list
+    obfuscated_grid = Grid(rows=grid.rows, cols=grid.cols, data=[bytearray(row) for row in grid.data])
+
+    # Validate: sum of all stencil sizes must equal ciphertext length
+    total_length_all_stencils = sum(stencil.len for stencil in stencils)
+    if total_length_all_stencils != len(ciphertext):
+        raise ValueError(
+            f"Total stencil positions ({total_length_all_stencils}) must equal ciphertext length ({len(ciphertext)})"
+        )
+
+    # TODO: add permutation logic while embedding ciphertext into grid based on secret_key.permutation
+
+    # check the length of every stencil matches the corresponding partition
+    for i, stencil in enumerate(stencils):
+        if stencil.len != partition_list[i]:
+            raise ValueError(
+                f"Stencil {i} length ({stencil.len}) does not match partition size ({partition_list[i]})"
+            )
+    # Make a mutable copy of ciphertext for consumption
+    cipher_copy = bytearray(ciphertext)
+    
+    # Embed cipher text into the grid
+    for i, stencil in enumerate(stencils):
+        # Step 1: Get partition size for this stencil
+        partition_size = partition_list[i]
+        
+        # Step 2: Extract first partition_size bytes from remaining cipher
+        ciphertext_partition = cipher_copy[:partition_size]
+        
+        # Step 3: Embed each byte at the corresponding stencil coordinate
+        for j, (row, col) in enumerate(stencil.coords):
+            obfuscated_grid.data[row][col] = ciphertext_partition[j]
+        
+        # Step 4: Remove consumed bytes from cipher copy before next iteration
+        cipher_copy = cipher_copy[partition_size:]
+
+    return obfuscated_grid
