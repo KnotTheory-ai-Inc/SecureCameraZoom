@@ -79,22 +79,13 @@ def embed_ciphertext(grid: Grid, ciphertext: bytes, secret_key: SecretKey) -> Gr
             raise ValueError(
                 f"Stencil {i} length ({stencil.len}) does not match partition size ({partition_list[i]})"
             )
-    # Make a mutable copy of ciphertext for consumption
-    cipher_copy = bytearray(ciphertext)
-    
+    partitioned_ciphertext = do_partitioning(ciphertext, partition_list)
+
     # Embed cipher text into the grid
     for i, stencil in enumerate(stencils):
-        # Step 1: Get partition size for this stencil
-        partition_size = partition_list[i]
-        
-        # Step 2: Extract first partition_size bytes from remaining cipher
-        ciphertext_partition = cipher_copy[:partition_size]
-        
-        # Step 3: Embed each byte at the corresponding stencil coordinate
+        ciphertext_partition = partitioned_ciphertext[i]
+
         for j, (row, col) in enumerate(stencil.coords):
             obfuscated_grid.data[row][col] = ciphertext_partition[j]
-        
-        # Step 4: Remove consumed bytes from cipher copy before next iteration
-        cipher_copy = cipher_copy[partition_size:]
 
     return obfuscated_grid
