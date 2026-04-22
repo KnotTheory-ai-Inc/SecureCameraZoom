@@ -3,7 +3,7 @@
 
 import random
 import pytest
-from src.python.common.classes import Grid, Stencil, SecretKey, GridDimension, CipherConfig
+from src.python.common.classes import Grid, Stencil, SecretKey, GridSize, CipherConfig
 from src.python.Encryption.steganography_encrypt import steganography_encrypt
 
 # Mock CipherConfig for testing

@@ -50,18 +50,18 @@ def test_stencil_system_circle(in_byte_len, cipher_cfg, grid_size):
     # Step 1: some constants
     plaintext = random.randbytes(in_byte_len)
     num_partitions = random.randint(in_byte_len // 4, in_byte_len * 3 // 4)
-    grid_dim = stencil_lib.GridDimension(rows=rows, cols=cols)
+    grid_size = stencil_lib.GridSize(rows=rows, cols=cols)
 
     # Step 2: keygen
     secret_key = stencil_lib.keygen(
         total_bytes=in_byte_len,
         num_partitions=num_partitions,
-        grid_dim=grid_dim,
+        grid_size=grid_size,
         cipher_cfg=cipher_cfg,
     )
 
     # Step 3: encrypt (cipher + steganography)
-    obfuscated_grid = stencil_lib.encrypt(plaintext, secret_key, grid_dim)
+    obfuscated_grid = stencil_lib.encrypt(plaintext, secret_key, grid_size)
 
     # Step 4: decrypt (steganography + cipher)
     recovered = stencil_lib.decrypt(obfuscated_grid, secret_key)

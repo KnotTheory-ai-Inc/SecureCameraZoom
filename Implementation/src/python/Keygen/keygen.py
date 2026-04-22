@@ -1,7 +1,7 @@
 import secrets
 import random  # TODO: replace with DRBG implementation
 from typing import List, Tuple
-from common.classes import CipherConfig, SecretKey, GridDimension, Stencil, StencilCoord, StencilCoords
+from common.classes import CipherConfig, SecretKey, GridSize, Stencil, StencilCoord, StencilCoords
 
 
 def generate_partition_list(total_bytes: int, num_partitions: int) -> List[int]:
@@ -34,14 +34,14 @@ def generate_partition_list(total_bytes: int, num_partitions: int) -> List[int]:
     return partition_list
 
 
-def generate_stencils_skewconnected(partition_list: List[int], grid_dim: GridDimension) -> List[Stencil]:
+def generate_stencils_skewconnected(partition_list: List[int], grid_size: GridSize) -> List[Stencil]:
     """
     For each partition group, place p coords using a skew-connected random walk:
     pick a random start, then step in a random cardinal or diagonal direction each time.
 
     Args:
         partition_list : list of group sizes, each >= 1.
-        grid_dim       : grid bounds.
+        grid_size       : grid bounds.
 
     Returns:
         List of Stencil objects, one per partition group.
@@ -49,7 +49,7 @@ def generate_stencils_skewconnected(partition_list: List[int], grid_dim: GridDim
     Raises:
         ValueError: if placement fails after MAX_ATTEMPTS.
     """
-    rows, cols = grid_dim.rows, grid_dim.cols
+    rows, cols = grid_size.rows, grid_size.cols
     if sum(partition_list) > rows * cols:
         raise ValueError(
             f"Grid ({rows}x{cols}) too small for {sum(partition_list)} total positions."
@@ -114,7 +114,7 @@ def generate_stencils_skewconnected(partition_list: List[int], grid_dim: GridDim
 
 def keygen( total_bytes: int,
             num_partitions: int,
-            grid_dim: GridDimension,
+            grid_size: GridSize,
             cipher_cfg: CipherConfig,
             partition_list:List[int] | None = None,
             stencils: List[Stencil] | None = None,
@@ -125,7 +125,7 @@ def keygen( total_bytes: int,
     Args:
         total_bytes     : length of the ciphertext.
         num_partitions  : number of partitions to create.
-        grid_dim        : grid dimensions.
+        grid_size       : grid size.
         cipher_cfg      : CipherConfig subclass.
         partition_list  : optional pre-computed partition. Generated internally if None.
         stencils        : optional pre-computed stencils. Generated internally if None.
@@ -137,7 +137,7 @@ def keygen( total_bytes: int,
         partition_list = generate_partition_list(total_bytes, num_partitions)
 
     if stencils is None:
-        stencils = generate_stencils_skewconnected(partition_list, grid_dim)
+        stencils = generate_stencils_skewconnected(partition_list, grid_size)
 
     return SecretKey(
         partition_list=partition_list,

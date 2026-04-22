@@ -10,7 +10,7 @@ import random
 import pytest
 import stencil_lib
 from utils.classes import CaesarConfig
-from stencil_lib import GridDimension
+from stencil_lib import GridSize
 
 
 @pytest.mark.parametrize("num_partitions", range(1, 15))
@@ -25,11 +25,11 @@ def test_steganography_algo_circle(byte_length, num_partitions):
     ciphertext = random.randbytes(byte_length)
 
     # Step 2: generate secret key — `byte_length` bytes, `num_partitions` partitions, 20x20 grid
-    grid_dim = GridDimension(rows=20, cols=20)
+    grid_size = GridSize(rows=20, cols=20)
     secret_key = stencil_lib.keygen(
         total_bytes=len(ciphertext),
         num_partitions=num_partitions,
-        grid_dim=grid_dim,
+        grid_size=grid_size,
         cipher_cfg=CaesarConfig(shift=5),  # cipher_cfg required by SecretKey, not used here
     )
 
