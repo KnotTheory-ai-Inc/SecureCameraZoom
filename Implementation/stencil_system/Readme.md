@@ -50,7 +50,7 @@ ciphertext = cipher_encrypt(b"HELLO", key_K)            # plaintext as bytes →
 
 # Step 3: Build grid and embed using Secret Key S
 grid = generate_random_grid(rows=r, cols=c)
-grid = embed_ciphertext(grid, ciphertext, secret_key)
+grid = steganography_encrypt(grid, ciphertext, secret_key)
 
 # Step 4: Convert to bytestream
 byte_stream = grid_to_bytestream(grid)
@@ -83,7 +83,7 @@ transmit(byte_stream)                                   # send grid to receiver 
 
 # Receiver side
 bytestream = receive_bytestream()                       # receive grid from sender
-rows, cols = get_grid_dimensions()                      # agree on grid dimensions
+rows, cols = get_grid_sizeensions()                      # agree on grid dimensions
 ```
 
 > For protocol related implementations, see [src/python/CommunicationProtocol/Readme.md](../src/python/CommunicationProtocol/Readme.md).
@@ -99,14 +99,14 @@ Pseudo code for Decryption + Extraction
 bytestream = receive_bytestream()                       # see communication_protocol.py
 
 # Step 2: Reconstruct grid
-rows, cols = get_grid_dimensions()                      # see communication_protocol.py
+rows, cols = get_grid_sizeensions()                      # see communication_protocol.py
 grid = bytestream_to_grid(bytestream, rows, cols)
 
 # Step 3: Secret Key S (received securely)
 secret_key = deserialize_secret_key(received_secret_key)
 
 # Step 4: Extract ciphertext from grid
-ciphertext = extract_ciphertext(grid, secret_key)
+ciphertext = steganography_decrypt(grid, secret_key)
 
 # Step 5: Level 1 decryption
 plaintext = cipher_decrypt(ciphertext, secret_key.crypto_key_K)

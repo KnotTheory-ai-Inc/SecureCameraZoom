@@ -31,10 +31,17 @@ def test_integration(context):
 
 
 @task
-def test(context):
-    """Run all tests (unit + integration)"""
+def test_sw(context):
+    """Run sw (system/workflow) tests."""
     html = "--html=build/report.html --self-contained-html"
-    context.run(f"pytest test/unit-tests test/integration-tests -v {html}")
+    context.run(f"pytest test/sw-tests -v {html}")
+
+
+@task
+def test(context):
+    """Run all tests (unit + integration + sw)"""
+    html = "--html=build/report.html --self-contained-html"
+    context.run(f"pytest test/unit-tests test/integration-tests test/sw-tests -v {html}")
 
 
 @task
