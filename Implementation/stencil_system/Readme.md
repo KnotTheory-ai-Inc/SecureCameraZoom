@@ -83,7 +83,7 @@ transmit(byte_stream)                                   # send grid to receiver 
 
 # Receiver side
 bytestream = receive_bytestream()                       # receive grid from sender
-rows, cols = get_grid_dimensions()                      # agree on grid dimensions
+rows, cols = get_grid_sizeensions()                      # agree on grid dimensions
 ```
 
 > For protocol related implementations, see [src/python/CommunicationProtocol/Readme.md](../src/python/CommunicationProtocol/Readme.md).
@@ -99,7 +99,7 @@ Pseudo code for Decryption + Extraction
 bytestream = receive_bytestream()                       # see communication_protocol.py
 
 # Step 2: Reconstruct grid
-rows, cols = get_grid_dimensions()                      # see communication_protocol.py
+rows, cols = get_grid_sizeensions()                      # see communication_protocol.py
 grid = bytestream_to_grid(bytestream, rows, cols)
 
 # Step 3: Secret Key S (received securely)

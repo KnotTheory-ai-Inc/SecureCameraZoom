@@ -26,13 +26,13 @@ class CipherConfig(ABC):
 
 
 @dataclass
-class GridDimension():
+class GridSize():
     rows: int
     cols: int
 
 
 @dataclass
-class Grid(GridDimension):
+class Grid(GridSize):
     data: List[bytearray]
 
 
