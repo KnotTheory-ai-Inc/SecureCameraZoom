@@ -1,7 +1,8 @@
 import secrets
 import random  # TODO: replace with DRBG implementation
+from math import prod
 from typing import List, Tuple
-from common.classes import CipherConfig, SecretKey, GridSize, Stencil, StencilCoord, StencilCoords
+from common.classes import CipherConfig, GridCoord, GridShape, SecretKey, Stencil, StencilCoord, StencilCoords
 
 
 def generate_partition_list(total_bytes: int, num_partitions: int) -> List[int]:
@@ -34,7 +35,7 @@ def generate_partition_list(total_bytes: int, num_partitions: int) -> List[int]:
     return partition_list
 
 
-def generate_stencils_skewconnected(partition_list: List[int], grid_size: GridSize) -> List[Stencil]:
+def generate_stencils_skewconnected(partition_list: List[int], grid_shape: GridShape) -> List[Stencil]:
     """
     For each partition group, place p coords using a skew-connected random walk:
     pick a random start, then step in a random cardinal or diagonal direction each time.
@@ -49,41 +50,39 @@ def generate_stencils_skewconnected(partition_list: List[int], grid_size: GridSi
     Raises:
         ValueError: if placement fails after MAX_ATTEMPTS.
     """
-    rows, cols = grid_size.rows, grid_size.cols
-    if sum(partition_list) > rows * cols:
+
+    if sum(partition_list) > prod(grid_shape.shape):
         raise ValueError(
-            f"Grid ({rows}x{cols}) too small for {sum(partition_list)} total positions."
+            f"Grid {grid_shape.shape} too small for {sum(partition_list)} total positions."
         )
 
-    # 8-directional: cardinal + diagonal (skew connectivity)
-    DIRECTIONS: List[StencilCoord] = [(0, 1), (0, -1), (1, 0), (-1, 0),
-                                       (1, 1), (1, -1), (-1, 1), (-1, -1)]
     MAX_ATTEMPTS = 10000
 
-    occupied: set = set()
-    free: set = {(r, c) for r in range(rows) for c in range(cols)}
+    free: set = grid_shape.all_coords()
     all_stencils: List[Stencil] = []
 
     for p in partition_list:
         stencil_coords: StencilCoords = []
 
         for _ in range(MAX_ATTEMPTS):
-            start: StencilCoord = random.choice(list(free))  # always unoccupied
+            start: StencilCoord = grid_shape.get_random_coord()
+            if start not in free:
+                continue
             stencil_coords = [start]
 
+            current_coord: StencilCoord = start
             for _ in range(p - 1):  # add (p-1) more coords one step at a time
-                last: StencilCoord = stencil_coords[-1]
-                valid_dirs = [
-                    (dr, dc) for dr, dc in DIRECTIONS
-                    if (last[0] + dr, last[1] + dc) in free
-                    and (last[0] + dr, last[1] + dc) not in stencil_coords
+                # get_neighbors handles bounds + all directions for any N-D grid
+                valid_neighbors = [
+                    nb for nb in grid_shape.get_neighbors(current_coord)
+                    if nb in free and nb not in stencil_coords
                 ]
-                if not valid_dirs:
+                if not valid_neighbors:
                     stencil_coords = []
                     break
-                dr, dc = random.choice(valid_dirs)
-                next_coord: StencilCoord = (last[0] + dr, last[1] + dc)
+                next_coord: StencilCoord = random.choice(valid_neighbors)
                 stencil_coords.append(next_coord)
+                current_coord = next_coord
 
             if len(stencil_coords) == p:
                 break
@@ -93,8 +92,7 @@ def generate_stencils_skewconnected(partition_list: List[int], grid_size: GridSi
                 f"Could not place stencil of size {p} after {MAX_ATTEMPTS} attempts."
             )
 
-        # add chosen stencil coord to occupied and remove from free
-        occupied.update(stencil_coords)
+        # remove placed coords from free
         free -= set(stencil_coords)
         all_stencils.append(Stencil(shape="skewconnected", len=len(stencil_coords), coords=stencil_coords))
 
@@ -114,7 +112,7 @@ def generate_stencils_skewconnected(partition_list: List[int], grid_size: GridSi
 
 def keygen( total_bytes: int,
             num_partitions: int,
-            grid_size: GridSize,
+            grid_shape: GridShape,
             cipher_cfg: CipherConfig,
             partition_list:List[int] | None = None,
             stencils: List[Stencil] | None = None,
@@ -125,7 +123,7 @@ def keygen( total_bytes: int,
     Args:
         total_bytes     : length of the ciphertext.
         num_partitions  : number of partitions to create.
-        grid_size       : grid size.
+        grid_shape      : shape of grid.
         cipher_cfg      : CipherConfig subclass.
         partition_list  : optional pre-computed partition. Generated internally if None.
         stencils        : optional pre-computed stencils. Generated internally if None.
@@ -137,7 +135,7 @@ def keygen( total_bytes: int,
         partition_list = generate_partition_list(total_bytes, num_partitions)
 
     if stencils is None:
-        stencils = generate_stencils_skewconnected(partition_list, grid_size)
+        stencils = generate_stencils_skewconnected(partition_list, grid_shape)
 
     return SecretKey(
         partition_list=partition_list,

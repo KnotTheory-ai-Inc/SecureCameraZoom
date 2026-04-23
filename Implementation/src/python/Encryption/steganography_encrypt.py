@@ -1,24 +1,20 @@
 import random
 from typing import List
-from common.classes import Grid, SecretKey
+from common.classes import GridShape, Grid, SecretKey
 
 
-def generate_random_grid(m: int, n: int) -> Grid:
+def generate_random_grid(grid_shape: GridShape) -> Grid:
     """
-    Fill a (m*n) grid with random byte values.
-
+    Create an N-dimensional Grid filled with random bytes.
     Args:
-        m : number of rows.
-        n : number of columns.
-
+        grid_shape: GridShape object specifying the dimensions of the grid.
     Returns:
-        data[row][col] : Grid
+        Grid with random data at every coordinate.
     """
-    data = []
-    for _ in range(m):
-        rand_row = bytearray(random.randbytes(n))
-        data.append(rand_row)
-    return Grid(rows=m, cols=n, data=data)
+
+    data = {coord: random.randint(0, 255) for coord in grid_shape.all_coords()}
+    grid = Grid(data=data)
+    return grid
 
 
 def do_partitioning(ciphertext: bytes, partition: List[int]) -> List[bytes]:
@@ -92,7 +88,7 @@ def steganography_encrypt(grid: Grid, ciphertext: bytes, secret_key: SecretKey) 
     """
     stencils = secret_key.stencils
     partition_list = secret_key.partition_list
-    obfuscated_grid = Grid(rows=grid.rows, cols=grid.cols, data=[bytearray(row) for row in grid.data])
+    obfuscated_grid = Grid(data={coord: value for coord, value in grid.data.items()})
 
     steganography_encrypt_preconditions(ciphertext, stencils, partition_list)
 
@@ -104,8 +100,8 @@ def steganography_encrypt(grid: Grid, ciphertext: bytes, secret_key: SecretKey) 
     for i, stencil in enumerate(stencils):
         ciphertext_partition = partitioned_ciphertext[i]
 
-        for j, (row, col) in enumerate(stencil.coords):
-            obfuscated_grid.data[row][col] = ciphertext_partition[j]
+        for j, coord in enumerate(stencil.coords):
+            obfuscated_grid.data[coord] = ciphertext_partition[j]
 
     return obfuscated_grid
 

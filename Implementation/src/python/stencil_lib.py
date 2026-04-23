@@ -1,4 +1,4 @@
-from common.classes import CipherConfig, SecretKey, Grid, GridSize
+from common.classes import CipherConfig, SecretKey, Grid, GridShape
 from Encryption.cipher_encrypt import cipher_encrypt
 from Decryption.cipher_decrypt import cipher_decrypt
 from Encryption.encrypt import encrypt
