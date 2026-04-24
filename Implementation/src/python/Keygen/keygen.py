@@ -42,7 +42,7 @@ def generate_stencils_skewconnected(partition_list: List[int], grid_shape: GridS
 
     Args:
         partition_list : list of group sizes, each >= 1.
-        grid_size       : grid bounds.
+        grid_shape     : Shape of Grid, used for bounds and neighbor logic.
 
     Returns:
         List of Stencil objects, one per partition group.
@@ -119,16 +119,15 @@ def keygen(
     """
     Bundle all stencil key material into a SecretKey.
 
+
     Args:
-        total_bytes     : length of the ciphertext.
-        num_partitions  : number of partitions to create.
-        grid_shape      : shape of grid.
-        cipher_cfg      : CipherConfig subclass.
-        partition_list  : optional pre-computed partition. Generated internally if None.
-        stencils        : optional pre-computed stencils. Generated internally if None.
+        stencil_cfg    : StencilConfig instance (encapsulates total_bytes, num_partitions, grid_shape)
+        cipher_cfg     : CipherConfig subclass (user-defined cipher parameters)
+        partition_list : Optional pre-computed partition list. If None, generated internally.
+        stencils       : Optional pre-computed stencils. If None, generated internally.
 
     Returns:
-        SecretKey dataclass.
+        SecretKey dataclass bundling all key material.
     """
 
     if partition_list is None:

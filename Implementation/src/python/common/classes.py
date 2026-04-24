@@ -6,7 +6,7 @@ import random
 from typing import List, Optional, Tuple
 
 # Type aliases for stencil coordinates
-StencilCoord = Tuple[int, ...]           # a single co-ordinate (x, y)
+StencilCoord = Tuple[int, ...]  # e.g. (row, col) for 2-D, (x, y, z) for 3-D
 StencilCoords = List[StencilCoord]       # list of co-ordinate pairs
 
 # N-D array of ints, e.g. [row, col] for 2-D, [x, y, z] for 3-D.
