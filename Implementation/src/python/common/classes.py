@@ -46,18 +46,20 @@ class GridShape:
         # Return all neighbors reachable by moving -1/0/+1 in each dimension (3^n - 1 total)
         neighbors = []
         ndim = len(coord)
+        zero_delta = (0,) * ndim
         for deltas in _iter_product([-1, 0, 1], repeat=ndim):
             # skip (0, 0, ..., 0) — that's the coord itself, not a neighbor
-            if deltas == (0,) * ndim:
+            if deltas == zero_delta:
                 continue
 
-            # apply delta to each dimension
-            neighbor = tuple(coord[i] + deltas[i] for i in range(ndim))
+            # check bounds for i-th neighbor - coord[i] + deltas[i]
+            in_bounds = all(0 <= coord[i] + deltas[i] < self.shape[i] for i in range(ndim))
+            if not in_bounds:
+                continue
 
-            # keep only neighbors that are inside the grid bounds
-            in_bounds = all(0 <= neighbor[i] < self.shape[i] for i in range(ndim))
-            if in_bounds:
-                neighbors.append(neighbor)
+            # if i-th neighbor - coord[i] + deltas[i] is in bounds, add to neighbors list
+            neighbor = tuple(coord[i] + deltas[i] for i in range(ndim))
+            neighbors.append(neighbor)
         return neighbors
 
     def get_random_coord(self) -> GridCoord:
