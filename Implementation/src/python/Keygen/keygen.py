@@ -2,7 +2,7 @@ import secrets
 import random  # TODO: replace with DRBG implementation
 from math import prod
 from typing import List, Tuple
-from common.classes import CipherConfig, GridCoord, GridShape, SecretKey, Stencil, StencilCoord, StencilCoords
+from common.classes import CipherConfig, GridCoord, GridShape, SecretKey, Stencil, StencilCoord, StencilCoords, StencilConfig
 
 
 def generate_partition_list(total_bytes: int, num_partitions: int) -> List[int]:
@@ -110,13 +110,12 @@ def generate_stencils_skewconnected(partition_list: List[int], grid_shape: GridS
     return all_stencils
 
 
-def keygen( total_bytes: int,
-            num_partitions: int,
-            grid_shape: GridShape,
-            cipher_cfg: CipherConfig,
-            partition_list:List[int] | None = None,
-            stencils: List[Stencil] | None = None,
-            ) -> SecretKey:
+def keygen(
+    stencil_cfg: StencilConfig,
+    cipher_cfg: CipherConfig,
+    partition_list: List[int] | None = None,
+    stencils: List[Stencil] | None = None,
+    ) -> SecretKey:
     """
     Bundle all stencil key material into a SecretKey.
 
@@ -131,11 +130,12 @@ def keygen( total_bytes: int,
     Returns:
         SecretKey dataclass.
     """
+
     if partition_list is None:
-        partition_list = generate_partition_list(total_bytes, num_partitions)
+        partition_list = generate_partition_list(stencil_cfg.total_bytes, stencil_cfg.num_partitions)
 
     if stencils is None:
-        stencils = generate_stencils_skewconnected(partition_list, grid_shape)
+        stencils = generate_stencils_skewconnected(partition_list, stencil_cfg.grid_shape)
 
     return SecretKey(
         partition_list=partition_list,
