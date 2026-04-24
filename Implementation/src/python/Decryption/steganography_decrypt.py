@@ -44,6 +44,9 @@ def steganography_decrypt(obfuscated_grid: Grid, secret_key: SecretKey) -> bytes
 
     extracted_ciphertext = bytearray()
     for stencil in stencils:
-        for (row, col) in stencil.coords:
-            extracted_ciphertext.append(obfuscated_grid.data[row][col])
+        for coord in stencil.coords:
+            coord_value = obfuscated_grid.get_value(coord)
+            if coord_value == -1:
+                raise ValueError(f"Grid coordinate {coord} is unset (value -1) during decryption.")
+            extracted_ciphertext.append(coord_value)
     return bytes(extracted_ciphertext)
