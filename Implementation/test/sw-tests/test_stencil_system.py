@@ -32,10 +32,13 @@ def test_stencil_system_circle(in_byte_len, cipher_cfg):
     num_partitions = random.randint(in_byte_len // 4, in_byte_len * 3 // 4)
 
     # Step 2: keygen
-    secret_key = stencil_lib.keygen(
+    stencil_cfg = stencil_lib.StencilConfig(
         total_bytes=in_byte_len,
         num_partitions=num_partitions,
         grid_shape=grid_shape,
+    )
+    secret_key = stencil_lib.keygen(
+        stencil_cfg,
         cipher_cfg=cipher_cfg,
     )
 

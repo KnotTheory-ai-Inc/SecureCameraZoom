@@ -93,6 +93,13 @@ class Stencil():
     len:    int = None
     coords: StencilCoords = field(default_factory=list)  # co-ordinates of stencil positions in grid
 
+# --- StencilConfig dataclass ---
+@dataclass
+class StencilConfig:
+    total_bytes: int
+    num_partitions: int
+    grid_shape: GridShape
+
 
 @dataclass
 class SecretKey:

@@ -30,10 +30,13 @@ def test_steganography_algo_circle(byte_length, num_partitions, grid_shape):
 
 
     # Step 2: generate secret key — `byte_length` bytes, `num_partitions` partitions, grid_shape
-    secret_key = stencil_lib.keygen(
+    stencil_cfg = stencil_lib.StencilConfig(
         total_bytes=len(ciphertext),
         num_partitions=num_partitions,
         grid_shape=grid_shape,
+    )
+    secret_key = stencil_lib.keygen(
+        stencil_cfg,
         cipher_cfg=CaesarConfig(shift=5),  # cipher_cfg required by SecretKey, not used here
     )
 
@@ -58,10 +61,13 @@ def test_steganography_algo_circle_7d_random():
     # Step 1: ciphertext (simulate output of Level 1 cipher)
     ciphertext = random.randbytes(byte_length)
     # Step 2: generate secret key
-    secret_key = stencil_lib.keygen(
+    stencil_cfg = stencil_lib.StencilConfig(
         total_bytes=len(ciphertext),
         num_partitions=num_partitions,
         grid_shape=grid_shape,
+    )
+    secret_key = stencil_lib.keygen(
+        stencil_cfg,
         cipher_cfg=CaesarConfig(shift=5),
     )
     # Step 3: generate obfuscation grid and embed
