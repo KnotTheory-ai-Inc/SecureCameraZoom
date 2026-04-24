@@ -36,6 +36,12 @@ class GridShape:
     # Size along each dimension, e.g. (rows, cols) for 2-D, (x, y, z) for 3-D
     shape: Tuple[int, ...]
 
+    def __post_init__(self):
+        if self.n != len(self.shape):
+            raise ValueError(f"GridShape: n ({self.n}) must match len(shape) ({len(self.shape)})")
+        if not all(isinstance(dim, int) and dim > 0 for dim in self.shape):
+            raise ValueError(f"GridShape: all dimensions in shape must be positive integers, got {self.shape}")
+
     def get_neighbors(self, coord: GridCoord) -> List[GridCoord]:
         # Return all neighbors reachable by moving -1/0/+1 in each dimension (3^n - 1 total)
         neighbors = []
