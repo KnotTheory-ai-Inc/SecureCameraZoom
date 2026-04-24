@@ -1,4 +1,5 @@
 import random
+from itertools import product
 from typing import List
 from common.classes import GridShape, Grid, SecretKey
 
@@ -12,7 +13,10 @@ def generate_random_grid(grid_shape: GridShape) -> Grid:
         Grid with random data at every coordinate.
     """
 
-    data = {coord: random.randint(0, 255) for coord in grid_shape.all_coords()}
+    data = {
+        coord: random.getrandbits(8)
+        for coord in product(*map(range, grid_shape.shape))
+    }
     grid = Grid(data=data)
     return grid
 
@@ -74,6 +78,7 @@ def steganography_encrypt(grid: Grid, ciphertext: bytes, secret_key: SecretKey) 
 
     For each stencil group i, place ciphertext bytes starting from offset sum(partition[:i]).
     Each stencil position (row, col) receives one byte of ciphertext.
+    Note: Input grid is mutated to obfuscated_grid.
 
     Args:
         grid       : Grid to embed into.
@@ -88,7 +93,7 @@ def steganography_encrypt(grid: Grid, ciphertext: bytes, secret_key: SecretKey) 
     """
     stencils = secret_key.stencils
     partition_list = secret_key.partition_list
-    obfuscated_grid = Grid(data={coord: value for coord, value in grid.data.items()})
+    obfuscated_grid = grid
 
     steganography_encrypt_preconditions(ciphertext, stencils, partition_list)
 

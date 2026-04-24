@@ -93,7 +93,7 @@ def generate_stencils_skewconnected(partition_list: List[int], grid_shape: GridS
             )
 
         # remove placed coords from free
-        free -= set(stencil_coords)
+        free.difference_update(stencil_coords)
         all_stencils.append(Stencil(shape="skewconnected", len=len(stencil_coords), coords=stencil_coords))
 
     # check that number of stencils matches num_partitions = len(partition_list)
