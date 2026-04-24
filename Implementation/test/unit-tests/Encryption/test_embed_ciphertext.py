@@ -3,7 +3,7 @@
 
 import random
 import pytest
-from src.python.common.classes import Grid, Stencil, SecretKey, GridSize, CipherConfig
+from src.python.common.classes import Grid, Stencil, SecretKey, GridShape, CipherConfig
 from src.python.Encryption.steganography_encrypt import steganography_encrypt
 
 # Mock CipherConfig for testing
@@ -34,8 +34,9 @@ def test_steganography_encrypt_basic():
     # Create ciphertext — random bytes, length must match sum(partition_list) = 5
     ciphertext = random.randbytes(5)
 
-    # Create grid
-    grid = Grid(rows=GRID_ROWS, cols=GRID_COLS, data=[bytearray(random.randbytes(GRID_COLS)) for _ in range(GRID_ROWS)])
+    # Create grid as dict-based for new Grid API
+    grid_data = {(r, c): random.randint(0, 255) for r in range(GRID_ROWS) for c in range(GRID_COLS)}
+    grid = Grid(data=grid_data)
 
     # Create secret key
     secret_key = SecretKey(
@@ -48,11 +49,11 @@ def test_steganography_encrypt_basic():
     result = steganography_encrypt(grid, ciphertext, secret_key)
 
     # Expected: each stencil coord holds the corresponding ciphertext byte
-    assert result.data[0][0] == ciphertext[0], f"Expected {ciphertext[0]} at (0,0), got {result.data[0][0]}"
-    assert result.data[0][1] == ciphertext[1], f"Expected {ciphertext[1]} at (0,1), got {result.data[0][1]}"
-    assert result.data[1][0] == ciphertext[2], f"Expected {ciphertext[2]} at (1,0), got {result.data[1][0]}"
-    assert result.data[1][1] == ciphertext[3], f"Expected {ciphertext[3]} at (1,1), got {result.data[1][1]}"
-    assert result.data[1][2] == ciphertext[4], f"Expected {ciphertext[4]} at (1,2), got {result.data[1][2]}"
+    assert result.data[(0, 0)] == ciphertext[0], f"Expected {ciphertext[0]} at (0,0), got {result.data[(0, 0)]}"
+    assert result.data[(0, 1)] == ciphertext[1], f"Expected {ciphertext[1]} at (0,1), got {result.data[(0, 1)]}"
+    assert result.data[(1, 0)] == ciphertext[2], f"Expected {ciphertext[2]} at (1,0), got {result.data[(1, 0)]}"
+    assert result.data[(1, 1)] == ciphertext[3], f"Expected {ciphertext[3]} at (1,1), got {result.data[(1, 1)]}"
+    assert result.data[(1, 2)] == ciphertext[4], f"Expected {ciphertext[4]} at (1,2), got {result.data[(1, 2)]}"
 
 
 @pytest.mark.parametrize("num_partitions", [2, 3, 5])
@@ -73,7 +74,8 @@ def test_steganography_encrypt_parametrized(n, num_partitions):
         coord_offset += size
 
     ciphertext = random.randbytes(n)
-    grid = Grid(rows=GRID_ROWS, cols=GRID_COLS, data=[bytearray(random.randbytes(GRID_COLS)) for _ in range(GRID_ROWS)])
+    grid_data = {(r, c): random.randint(0, 255) for r in range(GRID_ROWS) for c in range(GRID_COLS)}
+    grid = Grid(data=grid_data)
     secret_key = SecretKey(
         stencils=stencils,
         partition_list=partition_list,
@@ -84,6 +86,6 @@ def test_steganography_encrypt_parametrized(n, num_partitions):
 
     # Verify every embedded byte matches the ciphertext at its coord
     for idx, (row, col) in enumerate(all_coords):
-        assert result.data[row][col] == ciphertext[idx], \
-            f"n={n}, num_partitions={num_partitions}: Expected {ciphertext[idx]} at ({row},{col}), got {result.data[row][col]}"
+        assert result.data[(row, col)] == ciphertext[idx], \
+            f"n={n}, num_partitions={num_partitions}: Expected {ciphertext[idx]} at ({row},{col}), got {result.data[(row, col)]}"
 
