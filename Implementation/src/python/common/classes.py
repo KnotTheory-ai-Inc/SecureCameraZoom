@@ -63,9 +63,9 @@ class GridShape:
     def get_random_coord(self) -> GridCoord:
         """
         Return a random coordinate within the grid bounds.
-        Uses random.choice over all valid coordinates for consistency with stencil keygen logic.
+        Samples each dimension independently to avoid materializing all coordinates.
         """
-        return random.choice(list(self.all_coords()))
+        return tuple(random.randrange(dimension_size) for dimension_size in self.shape)
 
     def all_coords(self) -> set:
         """
