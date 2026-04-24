@@ -14,7 +14,7 @@ def encrypt(plaintext: bytes, secret_key: SecretKey, grid_shape: GridShape, grid
         plaintext  : raw bytes to encrypt
         secret_key : SecretKey type
         grid_shape : GridShape type
-        grid       : 2D list of bytes, with same dimensions as grid_shape (Optional)
+        grid       : Grid for steganography. If None, a random grid is generated internally.
 
     Returns:
         Obfuscated Grid with ciphertext hidden at stencil positions.
