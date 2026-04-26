@@ -1,8 +1,7 @@
-from typing import List
 from common.classes import Grid, SecretKey
 
 
-def steganography_decrypt_preconditions(stencils, partition_list: List[int]) -> None:
+def steganography_decrypt_preconditions(stencils, partition_list: list[int]) -> None:
     """
     Validate that stencil lengths and partition list are compatible.
 

@@ -1,16 +1,13 @@
 from abc import ABC, abstractmethod
-from enum import Enum
-from dataclasses import dataclass, field
 from itertools import product as _iter_product
 import random
-from typing import List, Optional, Tuple
 
 # Type aliases for stencil coordinates
-StencilCoord = Tuple[int, ...]  # e.g. (row, col) for 2-D, (x, y, z) for 3-D
-StencilCoords = List[StencilCoord]       # list of co-ordinate pairs
+StencilCoord = tuple[int, ...]  # e.g. (row, col) for 2-D, (x, y, z) for 3-D
+StencilCoords = list[StencilCoord]       # list of co-ordinate pairs
 
 # N-D array of ints, e.g. [row, col] for 2-D, [x, y, z] for 3-D.
-GridCoord = Tuple[int, ...]
+GridCoord = tuple[int, ...]
 class CipherConfig(ABC):
     """Abstract base class for all cipher keys.
 
@@ -29,20 +26,22 @@ class CipherConfig(ABC):
         pass
 
 
-@dataclass
 class GridShape:
-    # Number of dimensions, e.g. 2 for 2-D, 3 for 3-D, N for N-D.
-    n: int 
-    # Size along each dimension, e.g. (rows, cols) for 2-D, (x, y, z) for 3-D
-    shape: Tuple[int, ...]
+    """N-D grid shape with validation and neighbor/coordinate utilities.
+    
+    Attributes:
+        n: Number of dimensions (e.g., 2 for 2-D, 3 for 3-D)
+        shape: Size along each dimension (e.g., (num of rows, num of cols) for 2-D)
+    """
+    def __init__(self, n: int, shape: tuple[int, ...]):
+        if n != len(shape):
+            raise ValueError(f"GridShape: n ({n}) must match len(shape) ({len(shape)})")
+        if not all(isinstance(dim, int) and dim > 0 for dim in shape):
+            raise ValueError(f"GridShape: all dimensions in shape must be positive integers, got {shape}")
+        self.n = n
+        self.shape = shape
 
-    def __post_init__(self):
-        if self.n != len(self.shape):
-            raise ValueError(f"GridShape: n ({self.n}) must match len(shape) ({len(self.shape)})")
-        if not all(isinstance(dim, int) and dim > 0 for dim in self.shape):
-            raise ValueError(f"GridShape: all dimensions in shape must be positive integers, got {self.shape}")
-
-    def get_neighbors(self, coord: GridCoord) -> List[GridCoord]:
+    def get_neighbors(self, coord: GridCoord) -> list[GridCoord]:
         # Return all neighbors reachable by moving -1/0/+1 in each dimension (3^n - 1 total)
         neighbors = []
         ndim = len(coord)
@@ -79,40 +78,57 @@ class GridShape:
         return set(_iter_product(*map(range, self.shape)))
 
 
-@dataclass
-class Grid(GridShape):
-    # N-D grid with dict-based storage: data[coord] = int
+class Grid:
+    """N-D grid with dict-based storage: data[coord] = int.
+    
+    Attributes:
+        data: Dictionary mapping grid coordinates to byte values.
+    """
     def __init__(self, data: dict):
         self.data = data
 
     def get_value(self, coord: GridCoord) -> int:
-        # Get the byte value at the specified coordinate; return -1 if unset
+        """Get the byte value at the specified coordinate; return -1 if unset."""
         return self.data.get(coord, -1)
-    
 
-@dataclass
-class Stencil():
+
+class Stencil:
     """Represents a stencil — any arbitrary set of grid positions.
-    shape  : optional human-readable label e.g. "L-shape", "square", "disconnected"
-    len    : number of grid positions covered by stencil
-    coords : explicit (row, col) positions — the actual shape in Grid.
+    
+    Attributes:
+        shape: Optional human-readable label (e.g., "L-shape", "square", "disconnected").
+        len: Number of grid positions covered by stencil.
+        coords: Explicit coordinate positions — the actual shape in Grid.
     """
-    shape:  str = None # label
-    len:    int = None
-    coords: StencilCoords = field(default_factory=list)  # co-ordinates of stencil positions in grid
+    def __init__(self, shape: str = None, len: int = None, coords: StencilCoords = None):
+        self.shape = shape
+        self.len = len
+        self.coords = coords if coords is not None else []
 
-# --- StencilConfig dataclass ---
-@dataclass
+
 class StencilConfig:
-    total_bytes: int
-    num_partitions: int
-    grid_shape: GridShape
+    """Configuration for stencil key generation.
+    
+    Attributes:
+        total_bytes: Ciphertext length.
+        num_partitions: Number of partitions to create.
+        grid_shape: GridShape object specifying grid dimensions.
+    """
+    def __init__(self, total_bytes: int, num_partitions: int, grid_shape: GridShape):
+        self.total_bytes = total_bytes
+        self.num_partitions = num_partitions
+        self.grid_shape = grid_shape
 
 
-@dataclass
 class SecretKey:
-    stencils: List[Stencil]       # list of Stencil objects for each partition
-    partition_list:      List[int]     # e.g. [1, 1, 3]
-    #permutation:    List[int]    # sigma — shuffle of [0..n-1]
-    #reading_order:  str          # e.g. "top-bottom-left-right"
-    cipher_cfg:     CipherConfig  # bundles algo + params + encrypt()/decrypt() handles
+    """Secret key bundling stencil and cipher configuration.
+    
+    Attributes:
+        stencils: List of Stencil objects, one per partition.
+        partition_list: Partition sizes (e.g., [1, 1, 3]).
+        cipher_cfg: CipherConfig subclass bundling algorithm + parameters + encrypt/decrypt methods.
+    """
+    def __init__(self, stencils: list[Stencil], partition_list: list[int], cipher_cfg: CipherConfig):
+        self.stencils = stencils
+        self.partition_list = partition_list
+        self.cipher_cfg = cipher_cfg
