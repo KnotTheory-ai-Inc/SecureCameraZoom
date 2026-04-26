@@ -1,6 +1,5 @@
 import random
 from itertools import product
-from typing import List
 from common.classes import GridShape, Grid, SecretKey
 
 
@@ -21,7 +20,7 @@ def generate_random_grid(grid_shape: GridShape) -> Grid:
     return grid
 
 
-def do_partitioning(ciphertext: bytes, partition: List[int]) -> List[bytes]:
+def do_partitioning(ciphertext: bytes, partition: list[int]) -> list[bytes]:
     """
     Partition ciphertext into groups based on the partition list.
 
@@ -42,7 +41,7 @@ def do_partitioning(ciphertext: bytes, partition: List[int]) -> List[bytes]:
     return partitioned_ciphertext
 
 
-def steganography_encrypt_preconditions(ciphertext: bytes, stencils, partition_list: List[int]) -> None:
+def steganography_encrypt_preconditions(ciphertext: bytes, stencils, partition_list: list[int]) -> None:
     """
     Validate that ciphertext length and stencil partitions are compatible.
 

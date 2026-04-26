@@ -1,11 +1,9 @@
-import secrets
 import random  # TODO: replace with DRBG implementation
 from math import prod
-from typing import List, Tuple
 from common.classes import CipherConfig, GridCoord, GridShape, SecretKey, Stencil, StencilCoord, StencilCoords, StencilConfig
 
 
-def generate_partition_list(total_bytes: int, num_partitions: int) -> List[int]:
+def generate_partition_list(total_bytes: int, num_partitions: int) -> list[int]:
     """
     Generate a partition of length n for stencil key.
 
@@ -35,7 +33,7 @@ def generate_partition_list(total_bytes: int, num_partitions: int) -> List[int]:
     return partition_list
 
 
-def generate_stencils_skewconnected(partition_list: List[int], grid_shape: GridShape) -> List[Stencil]:
+def generate_stencils_skewconnected(partition_list: list[int], grid_shape: GridShape) -> list[Stencil]:
     """
     For each partition group, place p coords using a skew-connected random walk:
     pick a random start, then step in a random cardinal or diagonal direction each time.
@@ -59,7 +57,7 @@ def generate_stencils_skewconnected(partition_list: List[int], grid_shape: GridS
     MAX_ATTEMPTS = 10000
 
     free: set = grid_shape.all_coords()
-    all_stencils: List[Stencil] = []
+    all_stencils: list[Stencil] = []
 
     for p in partition_list:
         stencil_coords: StencilCoords = []
@@ -113,8 +111,8 @@ def generate_stencils_skewconnected(partition_list: List[int], grid_shape: GridS
 def keygen(
     stencil_cfg: StencilConfig,
     cipher_cfg: CipherConfig,
-    partition_list: List[int] | None = None,
-    stencils: List[Stencil] | None = None,
+    partition_list: list[int] | None = None,
+    stencils: list[Stencil] | None = None,
     ) -> SecretKey:
     """
     Bundle all stencil key material into a SecretKey.
