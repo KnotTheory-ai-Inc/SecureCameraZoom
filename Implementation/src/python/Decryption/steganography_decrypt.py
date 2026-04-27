@@ -41,6 +41,14 @@ def steganography_decrypt(obfuscated_grid: Grid, secret_key: SecretKey) -> bytes
 
     steganography_decrypt_preconditions(stencils, partition_list)
 
+    if secret_key.enable_grid_permutation:
+        # Apply inverse grid permutation to the stencils and partition list
+        inverse_grid_permutation = [0] * len(secret_key.grid_permutation)
+        for i, p in enumerate(secret_key.grid_permutation):
+            inverse_grid_permutation[p] = i
+        stencils = [stencils[i] for i in inverse_grid_permutation]
+        partition_list = [partition_list[i] for i in inverse_grid_permutation]
+
     extracted_ciphertext = bytearray()
     for stencil in stencils:
         for coord in stencil.coords:
