@@ -4,6 +4,7 @@ from Crypto.Util.Padding import pad, unpad
 import stencil_lib
 from utils.classes import AESConfig, CaesarConfig, VigenereConfig
 from utils.constants import AES_128_KEY_SIZE, AES_256_KEY_SIZE, AES_BLOCK_SIZE
+from stencil_lib import StencilConfig
 
 cipher_encrypt = stencil_lib.cipher_encrypt
 cipher_decrypt = stencil_lib.cipher_decrypt

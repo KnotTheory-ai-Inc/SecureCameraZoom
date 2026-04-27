@@ -4,6 +4,7 @@ from Crypto.Cipher import AES
 from utils.classes import CaesarConfig, VigenereConfig, AESConfig
 from utils.constants import AES_128_KEY_SIZE, AES_256_KEY_SIZE
 import stencil_lib
+from stencil_lib import StencilConfig
 
 _AES_KEY_128 = random.randbytes(AES_128_KEY_SIZE)
 _AES_KEY_256 = random.randbytes(AES_256_KEY_SIZE)

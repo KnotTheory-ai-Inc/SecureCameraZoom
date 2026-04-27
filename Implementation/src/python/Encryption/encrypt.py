@@ -26,4 +26,4 @@ def encrypt(plaintext: bytes, secret_key: SecretKey, stencil_cfg: StencilConfig,
         ciphertext = permuted_ciphertext
     if grid is None:
         grid = generate_random_grid(stencil_cfg.grid_shape)
-    return steganography_encrypt(grid, ciphertext, secret_key)
+    return steganography_encrypt(grid, ciphertext, secret_key, stencil_cfg)
