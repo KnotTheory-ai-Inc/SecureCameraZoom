@@ -96,8 +96,16 @@ def steganography_encrypt(grid: Grid, ciphertext: bytes, secret_key: SecretKey) 
 
     steganography_encrypt_preconditions(ciphertext, stencils, partition_list)
 
-    # TODO: add permutation logic while embedding ciphertext into grid based on secret_key.permutation
-
+    if secret_key.enable_grid_permutation:
+        # Apply grid permutation to the stencils and partition list
+        permuted_stencils = [None] * len(stencils)
+        permuted_partition_list = [0] * len(partition_list)
+        for i, p in enumerate(secret_key.grid_permutation):
+            permuted_stencils[p] = stencils[i]
+            permuted_partition_list[p] = partition_list[i]
+        stencils = permuted_stencils
+        partition_list = permuted_partition_list
+    
     partitioned_ciphertext = do_partitioning(ciphertext, partition_list)
 
     # Embed cipher text into the grid

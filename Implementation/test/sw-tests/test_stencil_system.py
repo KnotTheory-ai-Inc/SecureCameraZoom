@@ -43,10 +43,10 @@ def test_stencil_system_circle(in_byte_len, cipher_cfg):
     )
 
     # Step 3: encrypt (cipher + steganography)
-    obfuscated_grid = stencil_lib.encrypt(plaintext, secret_key, grid_shape)
+    obfuscated_grid = stencil_lib.encrypt(plaintext, secret_key, stencil_cfg)
 
     # Step 4: decrypt (steganography + cipher)
-    recovered = stencil_lib.decrypt(obfuscated_grid, secret_key)
+    recovered = stencil_lib.decrypt(obfuscated_grid, secret_key, stencil_cfg)
 
     assert recovered == plaintext, (
         f"Round-trip failed [length={in_byte_len}, partitions={num_partitions}, grid={grid_shape}]:\n"
