@@ -65,7 +65,7 @@ def decrypt(obfuscated_grid: Grid, secret_key: SecretKey, stencil_cfg: StencilCo
         Recovered plaintext as bytes.
     """
     decrypt_preconditions(obfuscated_grid, secret_key, stencil_cfg)
-    ciphertext = steganography_decrypt(obfuscated_grid, secret_key)
+    ciphertext = steganography_decrypt(obfuscated_grid, secret_key, stencil_cfg)
     if stencil_cfg.enable_cipher_permutation:
         # Apply inverse permutation to the ciphertext before decryption
         inverse_permutation = [0] * len(secret_key.cipher_permutation)

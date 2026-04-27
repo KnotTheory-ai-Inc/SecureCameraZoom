@@ -1,6 +1,7 @@
 import random
 import pytest
 from Encryption.steganography_encrypt import do_partitioning
+from stencil_lib import StencilConfig
 
 
 def test_partition_count():
