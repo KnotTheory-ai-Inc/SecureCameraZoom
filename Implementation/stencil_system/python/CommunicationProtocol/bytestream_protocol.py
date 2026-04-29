@@ -7,7 +7,7 @@ def grid_to_bytestream(grid: Grid) -> bytes:
     - Note: Equivalent byte index: grid.data[row][col] == bytestream[row * cols + col]
     """
 
-def get_grid_dimensions() -> Tuple[int, int]:
+def get_grid_sizeensions() -> Tuple[int, int]:
     """
     Return the (rows, cols) dimensions of the transmitted grid.
     - Output: (rows, cols) tuple
