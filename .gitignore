@@ -27,3 +27,4 @@ dist/
 .github/prompts/
 .github/*.md
 .github/instructions/
+Implementation/OCR/.env
