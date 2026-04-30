@@ -1,6 +1,6 @@
 import random
 from itertools import product
-from common.classes import GridShape, Grid, SecretKey
+from common.classes import GridShape, Grid, SecretKey, StencilConfig
 
 
 def generate_random_grid(grid_shape: GridShape) -> Grid:
@@ -71,7 +71,7 @@ def steganography_encrypt_preconditions(ciphertext: bytes, stencils, partition_l
             )
 
 
-def steganography_encrypt(grid: Grid, ciphertext: bytes, secret_key: SecretKey) -> Grid:
+def steganography_encrypt(grid: Grid, ciphertext: bytes, secret_key: SecretKey, stencil_cfg: StencilConfig) -> Grid:
     """
     Embed ciphertext bytes into the grid at stencil positions.
 
@@ -83,6 +83,7 @@ def steganography_encrypt(grid: Grid, ciphertext: bytes, secret_key: SecretKey) 
         grid       : Grid to embed into.
         ciphertext : bytes to embed.
         secret_key : SecretKey with stencils and partition.
+        stencil_cfg : StencilConfig with additional configuration.
 
     Returns:
         Modified Grid with ciphertext hidden at stencil positions.
@@ -96,8 +97,16 @@ def steganography_encrypt(grid: Grid, ciphertext: bytes, secret_key: SecretKey) 
 
     steganography_encrypt_preconditions(ciphertext, stencils, partition_list)
 
-    # TODO: add permutation logic while embedding ciphertext into grid based on secret_key.permutation
-
+    if stencil_cfg.enable_grid_permutation:
+        # Apply grid permutation to the stencils and partition list
+        permuted_stencils = [None] * len(stencils)
+        permuted_partition_list = [0] * len(partition_list)
+        for i, p in enumerate(secret_key.grid_permutation):
+            permuted_stencils[p] = stencils[i]
+            permuted_partition_list[p] = partition_list[i]
+        stencils = permuted_stencils
+        partition_list = permuted_partition_list
+    
     partitioned_ciphertext = do_partitioning(ciphertext, partition_list)
 
     # Embed cipher text into the grid

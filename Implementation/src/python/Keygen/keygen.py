@@ -133,10 +133,20 @@ def keygen(
 
     if stencils is None:
         stencils = generate_stencils_skewconnected(partition_list, stencil_cfg.grid_shape)
+    
+    if stencil_cfg.enable_cipher_permutation == True:
+        cipher_permutation = list(range(stencil_cfg.total_bytes))
+        random.shuffle(cipher_permutation)
+
+    if stencil_cfg.enable_grid_permutation == True:
+        grid_permutation = list(range(stencil_cfg.num_partitions))
+        random.shuffle(grid_permutation)
 
     return SecretKey(
         partition_list=partition_list,
         stencils=stencils,
         cipher_cfg=cipher_cfg,
+        cipher_permutation=cipher_permutation if stencil_cfg.enable_cipher_permutation else None,
+        grid_permutation=grid_permutation if stencil_cfg.enable_grid_permutation else None,
     )
 

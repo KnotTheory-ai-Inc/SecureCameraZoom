@@ -113,22 +113,41 @@ class StencilConfig:
         total_bytes: Ciphertext length.
         num_partitions: Number of partitions to create.
         grid_shape: GridShape object specifying grid dimensions.
+        enable_cipher_permutation: Choose whether keygen API should generate a cipher_permutation.
+            If True, ciphertext bytes are shuffled before being placed into stencil positions.
+        enable_grid_permutation: Choose whether keygen API should generate a grid_permutation.
+            If True, stencil slot assignments are shuffled after ciphertext is split across
+            stencils naturally (Possibility 2 — post-split permutation).
     """
-    def __init__(self, total_bytes: int, num_partitions: int, grid_shape: GridShape):
+    def __init__(self, total_bytes: int, num_partitions: int, grid_shape: GridShape,
+                 enable_cipher_permutation: bool = False, enable_grid_permutation: bool = False):
         self.total_bytes = total_bytes
         self.num_partitions = num_partitions
         self.grid_shape = grid_shape
+        self.enable_cipher_permutation = enable_cipher_permutation
+        self.enable_grid_permutation = enable_grid_permutation
 
 
 class SecretKey:
     """Secret key bundling stencil and cipher configuration.
-    
+
     Attributes:
-        stencils: List of Stencil objects, one per partition.
-        partition_list: Partition sizes (e.g., [1, 1, 3]).
+        stencils: List of Stencil objects, one per partition (SR_l).
+        partition_list: Partition sizes (e.g., [1, 1, 3]) — the partition R_l.
         cipher_cfg: CipherConfig subclass bundling algorithm + parameters + encrypt/decrypt methods.
+        cipher_permutation: permutation as a list of
+            ciphertext byte indices. cipher_permutation[i] = j means: the i-th stencil
+            position in reading order receives the j-th ciphertext byte. Applied before
+            placing bytes into stencil positions.
+        grid_permutation: permutation as a list of stencil
+            slot indices. grid_permutation[i] = j means: the i-th stencil in spatial order
+            receives the j-th ciphertext chunk after natural splitting. Applied after
+            distributing ciphertext across stencils.
     """
-    def __init__(self, stencils: list[Stencil], partition_list: list[int], cipher_cfg: CipherConfig):
+    def __init__(self, stencils: list[Stencil], partition_list: list[int], cipher_cfg: CipherConfig,
+                 cipher_permutation: list[int] | None = None, grid_permutation: list[int] | None = None):
         self.stencils = stencils
         self.partition_list = partition_list
         self.cipher_cfg = cipher_cfg
+        self.cipher_permutation = cipher_permutation
+        self.grid_permutation = grid_permutation
