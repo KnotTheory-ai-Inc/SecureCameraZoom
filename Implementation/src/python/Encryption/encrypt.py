@@ -21,6 +21,7 @@ def encrypt(plaintext: bytes, secret_key: SecretKey, stencil_cfg: StencilConfig,
     """
     ciphertext = cipher_encrypt(plaintext, secret_key.cipher_cfg)
     if stencil_cfg.enable_cipher_permutation == True:
+        # Apply permutation to the ciphertext before embedding
         permuted_ciphertext = bytes(ciphertext[i] for i in secret_key.cipher_permutation)
         ciphertext = permuted_ciphertext
     if grid is None:
