@@ -1,4 +1,4 @@
-from common.classes import Grid, SecretKey
+from common.classes import Grid, SecretKey, StencilConfig
 
 
 def steganography_decrypt_preconditions(stencils, partition_list: list[int]) -> None:
@@ -25,13 +25,14 @@ def steganography_decrypt_preconditions(stencils, partition_list: list[int]) -> 
             )
 
 
-def steganography_decrypt(obfuscated_grid: Grid, secret_key: SecretKey) -> bytes:
+def steganography_decrypt(obfuscated_grid: Grid, secret_key: SecretKey, stencil_cfg: StencilConfig) -> bytes:
     """
     Extract ciphertext bytes from the grid using Secret Key S.
 
     Args:
         obfuscated_grid : Grid containing the hidden ciphertext.
         secret_key      : SecretKey with stencils and partition.
+        stencil_cfg     : StencilConfig with permutation settings.
 
     Returns:
         Ciphertext bytes recovered from the grid.
@@ -40,6 +41,14 @@ def steganography_decrypt(obfuscated_grid: Grid, secret_key: SecretKey) -> bytes
     partition_list = secret_key.partition_list
 
     steganography_decrypt_preconditions(stencils, partition_list)
+
+    if stencil_cfg.enable_grid_permutation:
+        # Apply inverse grid permutation to the stencils and partition list
+        inverse_grid_permutation = [0] * len(secret_key.grid_permutation)
+        for i, p in enumerate(secret_key.grid_permutation):
+            inverse_grid_permutation[p] = i
+        stencils = [stencils[i] for i in inverse_grid_permutation]
+        partition_list = [partition_list[i] for i in inverse_grid_permutation]
 
     extracted_ciphertext = bytearray()
     for stencil in stencils:

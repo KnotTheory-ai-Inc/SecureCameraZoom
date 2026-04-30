@@ -10,7 +10,7 @@ import random
 import pytest
 import stencil_lib
 from utils.classes import CaesarConfig
-from stencil_lib import GridShape
+from stencil_lib import GridShape, StencilConfig
 
 
 @pytest.mark.parametrize("grid_shape", [
@@ -42,10 +42,10 @@ def test_steganography_algo_circle(byte_length, num_partitions, grid_shape):
 
     # Step 3: generate obfuscation grid and embed
     grid = stencil_lib.generate_random_grid(grid_shape) 
-    obfuscated_grid = stencil_lib.steganography_encrypt(grid, ciphertext, secret_key)
+    obfuscated_grid = stencil_lib.steganography_encrypt(grid, ciphertext, secret_key, stencil_cfg)
 
     # Step 4: extract and verify round-trip
-    recovered = stencil_lib.steganography_decrypt(obfuscated_grid, secret_key)
+    recovered = stencil_lib.steganography_decrypt(obfuscated_grid, secret_key, stencil_cfg)
 
     assert recovered == ciphertext, (
         f"Round-trip failed:\n  original : {ciphertext.hex()}\n  recovered: {recovered.hex()}"
@@ -72,9 +72,9 @@ def test_steganography_algo_circle_7d_random():
     )
     # Step 3: generate obfuscation grid and embed
     grid = stencil_lib.generate_random_grid(grid_shape)
-    obfuscated_grid = stencil_lib.steganography_encrypt(grid, ciphertext, secret_key)
+    obfuscated_grid = stencil_lib.steganography_encrypt(grid, ciphertext, secret_key, stencil_cfg)
     # Step 4: extract and verify round-trip
-    recovered = stencil_lib.steganography_decrypt(obfuscated_grid, secret_key)
+    recovered = stencil_lib.steganography_decrypt(obfuscated_grid, secret_key, stencil_cfg)
     assert recovered == ciphertext, (
         f"7D random test failed:\n  original : {ciphertext.hex()}\n  recovered: {recovered.hex()}"
     )

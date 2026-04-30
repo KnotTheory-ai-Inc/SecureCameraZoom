@@ -3,7 +3,7 @@
 
 import random
 import pytest
-from src.python.common.classes import Grid, Stencil, SecretKey, GridShape, CipherConfig
+from src.python.common.classes import Grid, Stencil, SecretKey, GridShape, StencilConfig, CipherConfig
 from src.python.Encryption.steganography_encrypt import steganography_encrypt
 
 # Mock CipherConfig for testing
@@ -45,8 +45,15 @@ def test_steganography_encrypt_basic():
         cipher_cfg=MockConfig()
     )
 
+    # Create stencil config
+    stencil_cfg = StencilConfig(
+        total_bytes=5,
+        num_partitions=2,
+        grid_shape=GridShape(n=2, shape=(GRID_ROWS, GRID_COLS))
+    )
+
     # Embed
-    result = steganography_encrypt(grid, ciphertext, secret_key)
+    result = steganography_encrypt(grid, ciphertext, secret_key, stencil_cfg)
 
     # Expected: each stencil coord holds the corresponding ciphertext byte
     assert result.data[(0, 0)] == ciphertext[0], f"Expected {ciphertext[0]} at (0,0), got {result.data[(0, 0)]}"
@@ -82,7 +89,13 @@ def test_steganography_encrypt_parametrized(n, num_partitions):
         cipher_cfg=MockConfig()
     )
 
-    result = steganography_encrypt(grid, ciphertext, secret_key)
+    stencil_cfg = StencilConfig(
+        total_bytes=n,
+        num_partitions=num_partitions,
+        grid_shape=GridShape(n=2, shape=(GRID_ROWS, GRID_COLS))
+    )
+
+    result = steganography_encrypt(grid, ciphertext, secret_key, stencil_cfg)
 
     # Verify every embedded byte matches the ciphertext at its coord
     for idx, (row, col) in enumerate(all_coords):
