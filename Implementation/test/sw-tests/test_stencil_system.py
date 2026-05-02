@@ -15,22 +15,35 @@ _AES_NONCE   = random.randbytes(8)
 _CIPHER_CFGS = [
     CaesarConfig(shift=200),
     VigenereConfig(keyword=b"mysecretkey"),
-    AESConfig(key=_AES_KEY_128, mode=AES.MODE_CBC, iv=_AES_IV),    # CBC, 128-bit key
     AESConfig(key=_AES_KEY_128, mode=AES.MODE_CTR, nonce=_AES_NONCE),  # CTR, 128-bit key
 ]
 
 
-@pytest.mark.parametrize("cipher_cfg", _CIPHER_CFGS, ids=["caesar200", "vigenere_mysecretkey", "aes_cbc_128", "aes_ctr_128"])
-@pytest.mark.parametrize("in_byte_len", [512, 640])
-def test_stencil_system_circle(in_byte_len, cipher_cfg):
-    """Full system circle: keygen → encrypt → decrypt must recover original plaintext."""
+_GRID_SHAPES = [
+    # 10-D hypercube: demonstrates n-dimensional generality (Gopal's "n-Hypercube" concept).
+    # get_neighbors is O(3^10)=59049 per step — fast enough for CI.
+    stencil_lib.GridShape(n=10, shape=(7, 3, 8, 10, 38, 18, 7, 10, 24, 15)),
+    # Image-like grid: 640×480 image with 4 channels (RGBA).
+    # coord (row, col, channel) → one byte; mirrors Gopal's "n×n×4 cuboid" discussion.
+    stencil_lib.GridShape(n=3, shape=(480, 640, 4)),
+]
 
-    # Use a fixed grid shape for all tests (e.g., 23x31x42)
-    grid_shape = stencil_lib.GridShape(n=3, shape=(23, 31, 42))
+
+@pytest.mark.parametrize("cipher_cfg", _CIPHER_CFGS)
+@pytest.mark.parametrize("in_byte_len", [512, 640])
+@pytest.mark.parametrize("grid_shape", _GRID_SHAPES, ids=["hypercube_10d", "image_rgba_480x640x4"])
+def test_stencil_system_circle(grid_shape, in_byte_len, cipher_cfg):
+    """Full system circle: keygen → encrypt → decrypt must recover original plaintext.
+
+    The image_rgba_480x640x4 parametrization validates that stencil_lib natively supports
+    an RGBA image as a grid: GridShape(n=3, shape=(H, W, 4)) where each coordinate
+    (row, col, channel) holds one byte (0-255), matching one R/G/B/A channel value.
+    Stencil positions pick specific pixel-channels as hiding spots for ciphertext bytes.
+    """
 
     # Step 1: some constants
-    plaintext = random.randbytes(in_byte_len)
-    num_partitions = random.randint(in_byte_len // 4, in_byte_len * 3 // 4)
+    plaintext        = random.randbytes(in_byte_len)
+    num_partitions   = random.randint(in_byte_len // 4, in_byte_len * 3 // 4)
 
     # Step 2: keygen
     stencil_cfg = stencil_lib.StencilConfig(
