@@ -1,5 +1,6 @@
 # Python PoC Implementation dependencies
 
+setuptools>=68      # Required by inv build (PEP 517 in-process wheel builder)
 pycryptodome        # AES encryption/decryption
 pytest              # Unit and integration testing
 pytest-cov          # Test coverage reporting
