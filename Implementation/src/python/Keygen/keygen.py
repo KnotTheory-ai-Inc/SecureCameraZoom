@@ -1,5 +1,4 @@
 import random  # TODO: replace with DRBG implementation
-from math import prod
 from common.classes import CipherConfig, GridCoord, GridShape, SecretKey, Stencil, StencilCoord, StencilCoords, StencilConfig
 
 
@@ -33,7 +32,11 @@ def generate_partition_list(total_bytes: int, num_partitions: int) -> list[int]:
     return partition_list
 
 
-def generate_stencils_skewconnected(partition_list: list[int], grid_shape: GridShape) -> list[Stencil]:
+def generate_stencils_skewconnected(
+    partition_list: list[int],
+    grid_shape: GridShape,
+    allowed_coords: set[GridCoord] | None = None,
+) -> list[Stencil]:
     """
     For each partition group, place p coords using a skew-connected random walk:
     pick a random start, then step in a random cardinal or diagonal direction each time.
@@ -41,6 +44,8 @@ def generate_stencils_skewconnected(partition_list: list[int], grid_shape: GridS
     Args:
         partition_list : list of group sizes, each >= 1.
         grid_shape     : Shape of Grid, used for bounds and neighbor logic.
+        allowed_coords : Optional set of coords to restrict placement to (e.g. a subdomain).
+                         If None, the entire grid is used.
 
     Returns:
         List of Stencil objects, one per partition group.
@@ -49,23 +54,21 @@ def generate_stencils_skewconnected(partition_list: list[int], grid_shape: GridS
         ValueError: if placement fails after MAX_ATTEMPTS.
     """
 
-    if sum(partition_list) > prod(grid_shape.shape):
+    free: set = allowed_coords.copy() if allowed_coords is not None else grid_shape.all_coords()
+
+    if sum(partition_list) > len(free):
         raise ValueError(
-            f"Grid {grid_shape.shape} too small for {sum(partition_list)} total positions."
+            f"Available space ({len(free)} coords) too small for {sum(partition_list)} total positions."
         )
 
     MAX_ATTEMPTS = 10000
-
-    free: set = grid_shape.all_coords()
     all_stencils: list[Stencil] = []
 
     for p in partition_list:
         stencil_coords: StencilCoords = []
 
         for _ in range(MAX_ATTEMPTS):
-            start: StencilCoord = grid_shape.get_random_coord()
-            if start not in free:
-                continue
+            start: StencilCoord = random.choice(list(free))
             stencil_coords = [start]
 
             current_coord: StencilCoord = start
@@ -108,6 +111,73 @@ def generate_stencils_skewconnected(partition_list: list[int], grid_shape: GridS
     return all_stencils
 
 
+def generate_stencils_across_subdomains(
+    partition_list: list[int],
+    grid_shape: GridShape,
+) -> list[Stencil]:
+    """
+    Distribute partitions randomly across user-defined subdomains, then run a
+    skew-connected walk within each subdomain's coordinate set.
+
+    Args:
+        partition_list : list of group sizes, each >= 1.
+        grid_shape     : GridShape with subdomain_predicates already set.
+
+    Returns:
+        List of Stencil objects in original partition_list order.
+
+    Raises:
+        ValueError: if any partition cannot be assigned because no subdomain has
+                    enough remaining space for it.
+    """
+    predicates = grid_shape.subdomain_predicates
+    k = len(predicates)
+
+    # Compute coordinate set and capacity for each subdomain(predicate)
+    subdomain_coords: list[set[GridCoord]] = []
+    capacity: list[int] = []
+    for pred in predicates:
+        coords = grid_shape.get_subdomain_coords(pred)
+        subdomain_coords.append(coords)
+        capacity.append(len(coords))
+
+    # Assign each partition to a subdomain: randomly pick one, retry if it lacks space
+    # assigned_subdomain[i] = subdomain index that partition i was assigned to
+    assigned_subdomain: list[int] = []
+    for idx, size in enumerate(partition_list):
+        subdomain_indices = list(range(k))
+        random.shuffle(subdomain_indices)
+
+        chosen_subdomain = None
+        for subdomain_idx in subdomain_indices:
+            if capacity[subdomain_idx] >= size:
+                chosen_subdomain = subdomain_idx
+                break
+
+        if chosen_subdomain is None:
+            raise ValueError(
+                f"No subdomain has enough remaining space for partition of size {size}. "
+                f"Remaining capacities per subdomain: {capacity}."
+            )
+
+        assigned_subdomain.append(chosen_subdomain)
+        capacity[chosen_subdomain] -= size
+
+    # Generate stencils per subdomain and record them by original partition index
+    stencil_map: dict[int, Stencil] = {}
+    for s_idx, coords in enumerate(subdomain_coords):
+        part_indices = [i for i, s in enumerate(assigned_subdomain) if s == s_idx]
+        if not part_indices:
+            continue
+        sub_sizes = [partition_list[j] for j in part_indices]
+        sub_stencils = generate_stencils_skewconnected(sub_sizes, grid_shape, allowed_coords=coords)
+        for original_idx, stencil in zip(part_indices, sub_stencils):
+            stencil_map[original_idx] = stencil
+
+    # Return stencils in partition_list order
+    return [stencil_map[i] for i in range(len(partition_list))]
+
+
 def keygen(
     stencil_cfg: StencilConfig,
     cipher_cfg: CipherConfig,
@@ -132,7 +202,13 @@ def keygen(
         partition_list = generate_partition_list(stencil_cfg.total_bytes, stencil_cfg.num_partitions)
 
     if stencils is None:
-        stencils = generate_stencils_skewconnected(partition_list, stencil_cfg.grid_shape)
+        grid_shape = stencil_cfg.grid_shape
+        if grid_shape.subdomain_predicates != []:
+            # generate stencils across subdomains defined by grid_shape.subdomain_predicates
+            stencils = generate_stencils_across_subdomains(partition_list, grid_shape)
+        else:
+            # generate stencils across entire grid without subdomain constraints
+            stencils = generate_stencils_skewconnected(partition_list, grid_shape)
     
     if stencil_cfg.enable_cipher_permutation == True:
         cipher_permutation = list(range(stencil_cfg.total_bytes))
@@ -149,4 +225,7 @@ def keygen(
         cipher_permutation=cipher_permutation if stencil_cfg.enable_cipher_permutation else None,
         grid_permutation=grid_permutation if stencil_cfg.enable_grid_permutation else None,
     )
+
+
+
 

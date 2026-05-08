@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from itertools import product as _iter_product
 import random
 
@@ -33,13 +34,14 @@ class GridShape:
         n: Number of dimensions (e.g., 2 for 2-D, 3 for 3-D)
         shape: Size along each dimension (e.g., (num of rows, num of cols) for 2-D)
     """
-    def __init__(self, n: int, shape: tuple[int, ...]):
+    def __init__(self, n: int, shape: tuple[int, ...], subdomain_predicates: list[Callable] = None):
         if n != len(shape):
             raise ValueError(f"GridShape: n ({n}) must match len(shape) ({len(shape)})")
         if not all(isinstance(dim, int) and dim > 0 for dim in shape):
             raise ValueError(f"GridShape: all dimensions in shape must be positive integers, got {shape}")
         self.n = n
         self.shape = shape
+        self.subdomain_predicates = subdomain_predicates if subdomain_predicates is not None else []
 
     def get_neighbors(self, coord: GridCoord) -> list[GridCoord]:
         # Return all neighbors reachable by moving -1/0/+1 in each dimension (3^n - 1 total)
@@ -76,6 +78,13 @@ class GridShape:
                 {(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)}
         """
         return set(_iter_product(*map(range, self.shape)))
+
+    def get_subdomain_coords(self, predicate: Callable) -> set[GridCoord]:
+        """
+        Return the set of coordinates in this grid that satisfy the given predicate function.
+        The predicate function takes a coordinate tuple as input and returns a boolean.
+        """
+        return {c for c in self.all_coords() if predicate(c)}
 
 
 class Grid:
