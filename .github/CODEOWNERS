@@ -1,0 +1,7 @@
+# CODEOWNERS
+# Syntax: <pattern>  <owner> [<owner> ...]
+# Owners are automatically requested for review when a PR touches matching files.
+# More specific rules override less specific ones (last match wins).
+
+# All files in Implementation/ require review from any of the admins
+Implementation/    @AdithyaSabarishSaravanan @ExtraTon618
