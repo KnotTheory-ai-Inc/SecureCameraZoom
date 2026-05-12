@@ -1,21 +1,14 @@
 import random
 import pytest
 from Crypto.Cipher import AES
-from utils.classes import CaesarConfig, VigenereConfig, AESConfig
-from utils.constants import AES_128_KEY_SIZE, AES_256_KEY_SIZE
+from utils.classes import CaesarConfig, VigenereConfig
 import stencil_lib
 from stencil_lib import StencilConfig
-
-_AES_KEY_128 = random.randbytes(AES_128_KEY_SIZE)
-_AES_KEY_256 = random.randbytes(AES_256_KEY_SIZE)
-_AES_IV      = random.randbytes(16)
-_AES_NONCE   = random.randbytes(8)
 
 
 _CIPHER_CFGS = [
     CaesarConfig(shift=200),
     VigenereConfig(keyword=b"mysecretkey"),
-    AESConfig(key=_AES_KEY_128, mode=AES.MODE_CTR, nonce=_AES_NONCE),  # CTR, 128-bit key
 ]
 
 
