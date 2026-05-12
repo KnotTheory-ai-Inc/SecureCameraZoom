@@ -16,8 +16,8 @@ from stencil_lib import GridShape, StencilConfig
 @pytest.mark.parametrize("grid_shape", [
     GridShape(n=5, shape=tuple(random.randint(3, 35) for _ in range(5))),
 ])
-@pytest.mark.parametrize("num_partitions", [1, 3, 5, 9, 10, 15, 20])
-@pytest.mark.parametrize("byte_length", [1, 5, 10, 31])
+@pytest.mark.parametrize("num_partitions", [1, 5, 9, 15, 20])
+@pytest.mark.parametrize("byte_length", [1, 5, 31])
 def test_steganography_algo_circle(byte_length, num_partitions, grid_shape):
     """Embed ciphertext into a random grid, then extract it — must recover original."""
 

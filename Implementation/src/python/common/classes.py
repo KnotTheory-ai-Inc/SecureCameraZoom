@@ -34,7 +34,8 @@ class GridShape:
         n: Number of dimensions (e.g., 2 for 2-D, 3 for 3-D)
         shape: Size along each dimension (e.g., (num of rows, num of cols) for 2-D)
     """
-    def __init__(self, n: int, shape: tuple[int, ...], subdomain_predicates: list[Callable] = None):
+    def __init__(self, n: int, shape: tuple[int, ...], subdomain_predicates: list[Callable] = None, 
+                    subdomain_coord_list: list[list[GridCoord]] = None):
         if n != len(shape):
             raise ValueError(f"GridShape: n ({n}) must match len(shape) ({len(shape)})")
         if not all(isinstance(dim, int) and dim > 0 for dim in shape):
@@ -42,7 +43,7 @@ class GridShape:
         self.n = n
         self.shape = shape
         self.subdomain_predicates = subdomain_predicates if subdomain_predicates is not None else []
-
+        self.subdomain_coord_list : list[list[GridCoord]] = subdomain_coord_list if subdomain_coord_list is not None else []
     def get_neighbors(self, coord: GridCoord) -> list[GridCoord]:
         # Return all neighbors reachable by moving -1/0/+1 in each dimension (3^n - 1 total)
         neighbors = []
@@ -127,14 +128,22 @@ class StencilConfig:
         enable_grid_permutation: Choose whether keygen API should generate a grid_permutation.
             If True, stencil slot assignments are shuffled after ciphertext is split across
             stencils naturally (Possibility 2 — post-split permutation).
+        subdomain_assignment: Only used when enable_subdomain_partitioning=True and
+            GridShape.subdomain_coord_list is set directly (Case B — explicit coord lists).
+            subdomain_assignment[i] = j means partition i is placed into subdomain j.
+            When None (default), assignment is chosen randomly (Case A — predicate-based).
     """
     def __init__(self, total_bytes: int, num_partitions: int, grid_shape: GridShape,
-                 enable_cipher_permutation: bool = False, enable_grid_permutation: bool = False):
+                 enable_cipher_permutation: bool = False, enable_grid_permutation: bool = False, 
+                 enable_subdomain_partitioning: bool = False,
+                 subdomain_assignment: list[int] | None = None):
         self.total_bytes = total_bytes
         self.num_partitions = num_partitions
         self.grid_shape = grid_shape
         self.enable_cipher_permutation = enable_cipher_permutation
         self.enable_grid_permutation = enable_grid_permutation
+        self.enable_subdomain_partitioning = enable_subdomain_partitioning
+        self.subdomain_assignment = subdomain_assignment
 
 
 class SecretKey:
