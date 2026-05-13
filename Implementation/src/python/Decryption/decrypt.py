@@ -34,12 +34,12 @@ def decrypt_preconditions(obfuscated_grid: Grid, secret_key: SecretKey, stencil_
             raise ValueError(
                 f"Stencil {i} length ({stencil.len}) does not match partition size ({secret_key.partition_list[i]})"
             )
-    
+
     expected_shape = stencil_cfg.grid_shape.shape
     out_of_bounds = [
         coord for coord in obfuscated_grid.data
         if len(coord) != len(expected_shape)
-        # Check for every co-ordinate if its value is within the bounds as defined by 
+        # Check for every co-ordinate if its value is within the bounds as defined by
         # respective dimension in expected_shape
         or any(coord[i] >= expected_shape[i] for i in range(len(expected_shape)))
     ]
@@ -70,7 +70,7 @@ def decrypt(obfuscated_grid: Grid, secret_key: SecretKey, stencil_cfg: StencilCo
         # Apply inverse permutation to the ciphertext before decryption
         inverse_permutation = [0] * len(secret_key.cipher_permutation)
         for i, p in enumerate(secret_key.cipher_permutation):
-            # inverse_permutation function: value becomes index, index becomes value 
-            inverse_permutation[p] = i  
+            # inverse_permutation function: value becomes index, index becomes value
+            inverse_permutation[p] = i
         ciphertext = bytes(ciphertext[i] for i in inverse_permutation)
     return cipher_decrypt(ciphertext, secret_key.cipher_cfg)
