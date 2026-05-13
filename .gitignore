@@ -27,8 +27,8 @@ dist/
 .github/prompts/
 .github/*.md
 .github/instructions/
-Implementation/OCR/.env
-Implementation/OCR/sample_images/*.png
-Implementation/OCR/sample_images/*.jpg
-Implementation/OCR/sample_images/*.jpeg
-Implementation/OCR/sample_images/*.webp
+Implementation/stencil_system_OCR/.env
+Implementation/stencil_system_OCR/sample_images/*.png
+Implementation/stencil_system_OCR/sample_images/*.jpg
+Implementation/stencil_system_OCR/sample_images/*.jpeg
+Implementation/stencil_system_OCR/sample_images/*.webp
