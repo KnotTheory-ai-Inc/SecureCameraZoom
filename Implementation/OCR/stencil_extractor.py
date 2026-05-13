@@ -6,7 +6,7 @@ this module extracts one cropped image per stencil coordinate — ordered
 exactly as the reading order the receiver uses to reassemble ciphertext.
 
 The OCR module then runs on each individual crop, reading one character per cell.
-Single-character crops give Gemini a much simpler task than full-grid OCR and
+Single-character crops give TrOCR a much simpler task than full-grid OCR and
 dramatically improve accuracy.
 
 Coordinate ordering (critical for correct ciphertext reconstruction):
@@ -26,7 +26,7 @@ from PIL import Image
 # Removes grid-line pixels that confuse the OCR model.
 CROP_INSET = 3
 
-# Upscale factor before sending to OCR — Gemini handles large images better.
+# Upscale factor before sending to TrOCR — larger images improve accuracy.
 UPSCALE_FACTOR = 4
 
 
@@ -99,7 +99,7 @@ def cell_to_pil(cell_bgr: np.ndarray, upscale: bool = True) -> Image.Image:
 
 
 def cell_to_bytes(cell_bgr: np.ndarray, upscale: bool = True) -> bytes:
-    """Convert a BGR cell crop to PNG bytes ready for Gemini's file API."""
+    """Convert a BGR cell crop to PNG bytes for TrOCR inference."""
     pil = cell_to_pil(cell_bgr, upscale=upscale)
     buf = io.BytesIO()
     pil.save(buf, format="PNG")
@@ -112,7 +112,7 @@ def preprocess_cell(cell_bgr: np.ndarray) -> np.ndarray:
       - Convert to grayscale
       - Adaptive threshold (handles uneven lighting from camera)
       - Light denoise
-    Returns BGR image (re-converted so Gemini gets a colour-safe image).
+    Returns BGR image (re-converted so TrOCR gets a colour-safe image).
     """
     gray    = cv2.cvtColor(cell_bgr, cv2.COLOR_BGR2GRAY)
     denoised = cv2.fastNlMeansDenoising(gray, h=10)
