@@ -1,9 +1,14 @@
 import io
 import sys
 import pytest
-import numpy as np
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+
+np = pytest.importorskip("numpy", reason="OCR tests require numpy — run: pip install -r stencil_system_OCR/requirements.txt")
+pytest.importorskip("cv2", reason="OCR tests require opencv-python")
+pytest.importorskip("transformers", reason="OCR tests require transformers")
+Image = pytest.importorskip("PIL.Image", reason="OCR tests require Pillow")
+
+from PIL import ImageDraw, ImageFont  # noqa: E402
 
 _OCR_DIR = Path(__file__).parent.parent.parent / "stencil_system_OCR"
 sys.path.insert(0, str(_OCR_DIR))
