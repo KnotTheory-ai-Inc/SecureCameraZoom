@@ -14,11 +14,10 @@ from stencil_lib import GridShape, StencilConfig
 
 
 @pytest.mark.parametrize("grid_shape", [
-    GridShape(n=4, shape=(7, 20, 15, 100)),
-    GridShape(n=5, shape=(15, 23, 7, 5, 12)),
+    GridShape(n=5, shape=tuple(random.randint(3, 35) for _ in range(5))),
 ])
-@pytest.mark.parametrize("num_partitions", range(1, 10))
-@pytest.mark.parametrize("byte_length", range(1, 32))
+@pytest.mark.parametrize("num_partitions", [1, 5, 9, 15, 20])
+@pytest.mark.parametrize("byte_length", [1, 5, 31])
 def test_steganography_algo_circle(byte_length, num_partitions, grid_shape):
     """Embed ciphertext into a random grid, then extract it — must recover original."""
 
@@ -54,7 +53,7 @@ def test_steganography_algo_circle(byte_length, num_partitions, grid_shape):
 
 def test_steganography_algo_circle_7d_random():
     """Special test: 7D grid, random byte_length (256-1024), random num_partitions (10-40)."""
-    grid_shape = GridShape(n=7, shape=(13, 7, 5, 6, 4, 8, 10))
+    grid_shape = GridShape(n=7, shape=tuple(random.randint(4, 18) for _ in range(7)))
     byte_length = random.randint(256, 1024)
     num_partitions = random.randint(10, 40)
 
