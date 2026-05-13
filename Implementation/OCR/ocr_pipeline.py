@@ -15,7 +15,7 @@ Full pipeline (Mode B — camera/image path):
             ▼  stencil_extractor.extract_stencil_cells()
     [Per-cell crops, ordered by SecretKey stencil reading order]
             │
-            ▼  SecureVisionOCR.ocr_single_cell()  (per cell)
+            ▼  SecureVisionOCR.ocr_single_cell()  — local TrOCR, no API
     [OCR'd byte value at each stencil coordinate]
             │
             ▼  Reconstruct Grid object with OCR'd values
@@ -54,7 +54,7 @@ subprocess.check_call(
 
 import stencil_lib  # noqa: E402  — installed above
 
-from grid_renderer     import render_grid, render_grid_bytes, char_to_byte  # noqa: E402
+from grid_renderer     import render_grid, char_to_byte          # noqa: E402
 from grid_detector     import load_image, detect_and_align_grid, estimate_cell_size  # noqa: E402
 from stencil_extractor import (  # noqa: E402
     extract_stencil_cells,
@@ -73,7 +73,7 @@ def render_stencil_image(
 ) -> str:
     """
     Sender utility: convert an obfuscated Grid (output of stencil_lib.encrypt)
-    to a printable PNG for fax / screen transmission.
+    to a printable PNG for fax / screen / camera transmission.
 
     Args:
         grid        : stencil_lib.Grid — output of stencil_lib.encrypt().
@@ -94,21 +94,25 @@ def ocr_image_to_grid(
     secret_key: stencil_lib.SecretKey,
     stencil_cfg: stencil_lib.StencilConfig,
     preprocess: bool = True,
+    mode: str = "printed",
 ) -> stencil_lib.Grid:
     """
-    Read a stencil image via OCR and reconstruct a stencil_lib.Grid object.
+    Read a stencil image via local TrOCR and reconstruct a stencil_lib.Grid.
 
-    Each stencil coordinate is read via Gemini single-cell OCR. The resulting
-    character is converted back to a byte value and placed at the correct
-    coordinate in a new Grid. Non-stencil cells are left at their OCR'd values
-    (or 0 if unreadable), preserving the Grid structure that stencil_lib.decrypt
-    expects.
+    Each stencil coordinate is read by TrOCR (offline, CPU-only). The
+    resulting character is converted back to its byte value and placed at
+    the correct coordinate in a new Grid. Non-stencil cells stay empty
+    (not needed by steganography_decrypt — it only reads stencil positions).
 
     Args:
         image_path  : Path to the camera/scan image of the printed stencil.
         secret_key  : stencil_lib.SecretKey from the key exchange.
         stencil_cfg : stencil_lib.StencilConfig used during encryption.
         preprocess  : Apply per-cell adaptive threshold before OCR.
+                      Recommended for real camera images; disable for clean
+                      synthetic/rendered images.
+        mode        : "printed" for typed/rendered grids (default),
+                      "handwritten" for physically handwritten grids.
 
     Returns:
         stencil_lib.Grid with OCR'd byte values at all stencil coordinates.
@@ -116,7 +120,7 @@ def ocr_image_to_grid(
     if stencil_cfg.grid_shape.n != 2:
         raise ValueError("OCR pipeline only supports 2-D grids (n=2).")
 
-    ocr = SecureVisionOCR()
+    ocr = SecureVisionOCR(mode=mode)
 
     # Step 1 — load and perspective-correct the grid image
     raw_image  = load_image(image_path)
@@ -130,15 +134,13 @@ def ocr_image_to_grid(
         grid_image, secret_key, stencil_cfg.grid_shape, cell_h, cell_w
     )
 
-    # Step 3 — OCR each cell and build the reconstructed grid dict
+    # Step 3 — local TrOCR per cell → reconstruct grid dict
     grid_data: dict = {}
     for coord, cell_bgr in cells:
         if preprocess:
             cell_bgr = preprocess_cell(cell_bgr)
-
-        cell_png = cell_to_bytes(cell_bgr, upscale=True)
-        char_str = ocr.ocr_single_cell(cell_png)
-
+        cell_png  = cell_to_bytes(cell_bgr, upscale=True)
+        char_str  = ocr.ocr_single_cell(cell_png)
         grid_data[coord] = char_to_byte(char_str[0]) if char_str else 0
 
     return stencil_lib.Grid(data=grid_data)
@@ -149,25 +151,27 @@ def full_ocr_decrypt(
     secret_key: stencil_lib.SecretKey,
     stencil_cfg: stencil_lib.StencilConfig,
     preprocess: bool = True,
+    mode: str = "printed",
 ) -> bytes:
     """
-    Convenience function: camera image → plaintext in one call.
+    Convenience: camera image → plaintext in one call.
 
-    Reconstructs a Grid from OCR, then passes it directly to
-    stencil_lib.decrypt() — the same path as the byte-stream Mode A,
-    keeping all crypto logic inside stencil_lib.
+    Reconstructs a Grid from local TrOCR, then passes it to
+    stencil_lib.decrypt() — all crypto logic stays inside stencil_lib.
 
     Args:
         image_path  : Path to the stencil image.
-        secret_key  : stencil_lib.SecretKey (must include cipher_cfg).
+        secret_key  : stencil_lib.SecretKey.
         stencil_cfg : stencil_lib.StencilConfig used during encryption.
         preprocess  : Apply cell preprocessing before OCR.
+        mode        : "printed" or "handwritten".
 
     Returns:
         Recovered plaintext as bytes.
     """
     reconstructed_grid = ocr_image_to_grid(
-        image_path, secret_key, stencil_cfg, preprocess=preprocess
+        image_path, secret_key, stencil_cfg,
+        preprocess=preprocess, mode=mode,
     )
     # All crypto (steganography_decrypt + cipher_decrypt + permutations)
     # is handled internally by stencil_lib.decrypt — not duplicated here.
@@ -181,21 +185,17 @@ def diagnose_pipeline(
     secret_key: stencil_lib.SecretKey,
     stencil_cfg: stencil_lib.StencilConfig,
     output_dir: str = ".",
+    mode: str = "printed",
 ) -> dict:
     """
     Run the pipeline and save intermediate images for debugging.
-    Returns a dict with paths and per-cell OCR results.
-
-    Saves:
-        <output_dir>/debug_aligned.png    — perspective-corrected grid
-        <output_dir>/debug_annotated.png  — stencil cells highlighted
-        <output_dir>/debug_cell_NNN.png   — each extracted cell crop
+    Saves aligned grid, annotated grid, and per-cell crops to output_dir.
     """
     import cv2 as _cv2
     from stencil_extractor import annotate_grid_with_coords
 
     os.makedirs(output_dir, exist_ok=True)
-    ocr = SecureVisionOCR()
+    ocr = SecureVisionOCR(mode=mode)
 
     raw_image  = load_image(image_path)
     grid_image = detect_and_align_grid(raw_image)

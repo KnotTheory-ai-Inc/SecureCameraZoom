@@ -1,6 +1,8 @@
-google-genai
+transformers
+torch
+torchvision
 opencv-python
-python-dotenv
-pytest
 pillow
 numpy
+python-doctr[torch]
+pytest
