@@ -60,7 +60,7 @@ def keygen(
     if stencils is None:
         grid_shape = stencil_cfg.grid_shape
         if  stencil_cfg.enable_subdomain_partitioning == True:
-            # generate stencils across subdomains defined by grid_shape.subdomain_predicates or subdomain_coord_list
+            # generate stencils across subdomains defined by grid_shape.subdomain_selectors or subdomain_coord_list
             stencils = generate_stencils_across_subdomains(partition_list, grid_shape, stencil_cfg.subdomain_assignment)
         else:
             # generate stencils across entire grid without subdomain constraints

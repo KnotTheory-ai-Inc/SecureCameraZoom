@@ -33,12 +33,14 @@ def generate_stencils_skewconnected(
 
     MAX_ATTEMPTS = 10000
     all_stencils: list[Stencil] = []
+    # built once; refreshed only after each confirmed placement of stencil in Grid/subdomain
+    free_list: list[GridCoord] = list(free)
 
     for p in partition_list:
         stencil_coords: StencilCoords = []
 
         for _ in range(MAX_ATTEMPTS):
-            start: StencilCoord = random.choice(list(free))
+            start: StencilCoord = random.choice(free_list)
             stencil_coords = [start]
 
             current_coord: StencilCoord = start
@@ -65,6 +67,8 @@ def generate_stencils_skewconnected(
 
         # remove placed coords from free
         free.difference_update(stencil_coords)
+        # refresh free_list after confirmed stencil placement outside of attempts loop
+        free_list = list(free)
         all_stencils.append(Stencil(shape="skewconnected", len=len(stencil_coords), coords=stencil_coords))
 
     # check that number of stencils matches num_partitions = len(partition_list)

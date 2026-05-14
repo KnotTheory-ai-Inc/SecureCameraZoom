@@ -33,8 +33,16 @@ class GridShape:
     Attributes:
         n: Number of dimensions (e.g., 2 for 2-D, 3 for 3-D)
         shape: Size along each dimension (e.g., (num of rows, num of cols) for 2-D)
+        subdomain_selectors: List of selector functions, one per subdomain (Case A).
+            Each selector takes a GridCoord and returns True if that coord belongs to
+            the subdomain. Coord sets are derived lazily in generate_stencils_across_subdomains.
+        subdomain_coord_list: Explicit list of coord lists, one per subdomain (Case B).
+            Can be set directly by the caller instead of using selector functions.
+        free_subdomain_coord_list: Mutable free-set per subdomain — mirrors subdomain_coord_list
+            as sets, shrinking as stencils are placed. Allows direct per-partition stencil
+            generation without grouping. Initialised automatically from subdomain_coord_list.
     """
-    def __init__(self, n: int, shape: tuple[int, ...], subdomain_predicates: list[Callable] = None, 
+    def __init__(self, n: int, shape: tuple[int, ...], subdomain_selectors: list[Callable] = None, 
                     subdomain_coord_list: list[list[GridCoord]] = None):
         if n != len(shape):
             raise ValueError(f"GridShape: n ({n}) must match len(shape) ({len(shape)})")
@@ -42,8 +50,12 @@ class GridShape:
             raise ValueError(f"GridShape: all dimensions in shape must be positive integers, got {shape}")
         self.n = n
         self.shape = shape
-        self.subdomain_predicates = subdomain_predicates if subdomain_predicates is not None else []
+        self.subdomain_selectors = subdomain_selectors if subdomain_selectors is not None else []
         self.subdomain_coord_list : list[list[GridCoord]] = subdomain_coord_list if subdomain_coord_list is not None else []
+        self.free_subdomain_coord_list: list[set[GridCoord]] = (
+            [set(coords) for coords in subdomain_coord_list]
+            if subdomain_coord_list is not None else []
+        )
     def get_neighbors(self, coord: GridCoord) -> list[GridCoord]:
         # Return all neighbors reachable by moving -1/0/+1 in each dimension (3^n - 1 total)
         neighbors = []
