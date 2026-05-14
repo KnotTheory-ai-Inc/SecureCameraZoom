@@ -1,4 +1,28 @@
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
 from stencil_lib import CipherConfig
+from utils.constants import AES_BLOCK_SIZE
+
+
+class AESConfigPadded(CipherConfig):
+    """AES-128 ECB config that handles PKCS7 padding/unpadding internally.
+
+    encrypt(plaintext) → pad → AES-encrypt → ciphertext
+    decrypt(ciphertext) → AES-decrypt → unpad → plaintext
+    """
+    algo = "aes"
+
+    def __init__(self, key: bytes):
+        self.parameters = {"key": key, "mode": AES.MODE_ECB}
+
+    def encrypt(self, plaintext: bytes, *args, **kwargs) -> bytes:
+        padded = pad(plaintext, AES_BLOCK_SIZE)
+        cipher = AES.new(self.parameters["key"], self.parameters["mode"])
+        return cipher.encrypt(padded)
+
+    def decrypt(self, ciphertext: bytes, *args, **kwargs) -> bytes:
+        cipher = AES.new(self.parameters["key"], self.parameters["mode"])
+        return unpad(cipher.decrypt(ciphertext), AES_BLOCK_SIZE)
 
 
 class AESConfig(CipherConfig):
