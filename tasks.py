@@ -5,7 +5,7 @@ from invoke import task
 # When a fn is marked as task,
 # context is injected by invoke and hence context.run() executes shell commands
 
-# Absolute path to the Implementation/ directory — ensures build output and test
+# Absolute path to the repository root directory — ensures build output and test
 # paths resolve correctly regardless of the working directory inv is called from.
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 

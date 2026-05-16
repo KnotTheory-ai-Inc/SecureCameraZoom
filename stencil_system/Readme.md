@@ -13,7 +13,7 @@ This folder manifests/demonstrates the final steganographic based cybersecurity 
 ### Dependency on `src/`
 
 `stencil_app` depends on the `securecamerazoom` library built from `src/`.  
-Run `inv build` from `Implementation/` before running anything in `stencil_app/`.
+Run `inv build` from the repository root before running anything in `stencil_app/`.
 
 ---
 

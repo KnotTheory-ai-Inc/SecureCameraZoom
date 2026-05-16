@@ -36,18 +36,14 @@ def decrypt_preconditions(obfuscated_grid: Grid, secret_key: SecretKey, stencil_
             )
     
     expected_shape = stencil_cfg.grid_shape.shape
-    out_of_bounds = [
-        coord for coord in obfuscated_grid.data
-        if len(coord) != len(expected_shape)
-        # Check for every co-ordinate if its value is within the bounds as defined by 
-        # respective dimension in expected_shape
-        or any(coord[i] >= expected_shape[i] for i in range(len(expected_shape)))
-    ]
-    if out_of_bounds:
-        raise ValueError(
-            f"Grid contains {len(out_of_bounds)} coordinate(s) out of bounds for expected shape {expected_shape}. "
-            f"First offending coord: {out_of_bounds[0]}"
-        )
+    ndim = len(expected_shape)
+    for i, stencil in enumerate(secret_key.stencils):
+        for coord in stencil.coords:
+            # Validate only coordinates that decryption actually reads.
+            if len(coord) != ndim or any(coord[d] < 0 or coord[d] >= expected_shape[d] for d in range(ndim)):
+                raise ValueError(
+                    f"Stencil {i} contains out-of-bounds coordinate {coord} for expected shape {expected_shape}."
+                )
 
 def decrypt(obfuscated_grid: Grid, secret_key: SecretKey, stencil_cfg: StencilConfig) -> bytes:
     """
