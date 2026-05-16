@@ -24,17 +24,16 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r Implementation/requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Build wheel
-        working-directory: Implementation
         run: inv build
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
           name: wheel
-          path: Implementation/build/dist/*.whl
+          path: build/dist/*.whl
 
   test:
     runs-on: ubuntu-latest
@@ -50,16 +49,15 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r Implementation/requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Download wheel
         uses: actions/download-artifact@v4
         with:
           name: wheel
-          path: Implementation/build/dist/
+          path: build/dist/
 
       - name: Run tests
-        working-directory: Implementation
         run: inv test
 
       - name: Upload test report
@@ -67,4 +65,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-report
-          path: Implementation/build/report.html
+          path: build/report.html
