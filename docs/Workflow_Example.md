@@ -1,4 +1,4 @@
-# A detailed stencil crypo-system example flow
+# A detailed stencil crypto-system example flow
 
 ## Step 1: Encrypt the Plaintext First (Level 1 encryption)
 
@@ -57,7 +57,7 @@ The grid can be transmitted as:
 - Byte stream over network (byte-stream implementation)
 - Physical paper through fax/OCR (OCR implementation)
 
-## Step 5: Steganographic Decryption (Level 1 decryption)
+## Step 5: Steganographic Decryption (Level 2 decryption)
 
 Input:
 1. Obscured grid
@@ -79,7 +79,7 @@ Output ciphertext:
 "Xk9mP"
 ```
 
-## Step 6: Decrypt the Ciphertext (Level 2 decryption)
+## Step 6: Decrypt the Ciphertext (Level 1 decryption)
 
 Using classical decryption schemes: MHKC/AES with crypto secret key K.
 
