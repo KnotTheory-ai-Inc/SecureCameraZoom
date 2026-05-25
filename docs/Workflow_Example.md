@@ -60,29 +60,20 @@ The grid can be transmitted as:
 ## Step 5: Steganographic Decryption (Level 2 decryption)
 
 Input:
-1. Obscured grid
+1. Obscured grid (as bytes)
 2. Receiver already has secret key S (stencil indices/coordinates + crypto key)
 
-Camera zoom based OCR technique:
+In both transmission modes the receiver feeds the raw grid bytes into `stencil_lib`:
+
+- **Camera zoom / OCR:** Camera scans the received image and reconstructs the grid bytes → passed to `stencil_lib`
+- **Byte-stream:** Grid bytes arrive directly over the network → passed to `stencil_lib`
 
 ```
-Camera uses those coordinates to zoom to specific grid positions
-OCR reads characters at each position -> collects "Xk9mP"
-```
-
-Byte-stream implementation:
-The grid is stored in memory and classical array/pointer mechanisms are used to recover ciphertext.
-
-Output ciphertext:
-
-```
-"Xk9mP"
+obfuscated grid  →  [extract stencil positions]  →  ciphertext bytes
 ```
 
 ## Step 6: Decrypt the Ciphertext (Level 1 decryption)
 
-Using classical decryption schemes: MHKC/AES with crypto secret key K.
-
-```
-"Xk9mP" -> [Decryption] -> "HELLO"
+ciphertext  →  [Level 1 decrypt]  →  plaintext
+       e.g. "Xk9mP" → "HELLO"
 ```
