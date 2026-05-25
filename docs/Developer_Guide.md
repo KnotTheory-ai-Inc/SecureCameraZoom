@@ -22,9 +22,10 @@ Both modes share all modules **except** the extraction step.
 | | **Mode A: Byte Stream** | **Mode B: OCR (Camera)** |
 |---|---|---|
 | Grid format | `byte[]` / `char[][]` in memory | Printed paper or displayed image |
-| Extraction | `grid[row * cols + col]` — direct array indexing | Camera zoom + OCR per coordinate |
+| Grid delivery | Grid bytes arrive directly over the network | Camera scans image → OCR reconstructs grid bytes |
 | Use case | Network communication | Air-gapped / paper-based systems / Image transfer systems |
 
+* Note:  Both modes pass the grid bytes to `stencil_lib`, which extracts ciphertext from stencil positions (Level 2) then runs cipher decryption (Level 1)
 ---
 
 ## Folder Structure

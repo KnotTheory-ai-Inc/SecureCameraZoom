@@ -1,125 +1,90 @@
-# SecureCameraZoom
+# A stencil based crypto-scheme
 
-## The Overall Dataflow of the Paper-Pencil Crypto-scheme
+## Table of Contents
 
-![The Dataflow](Paper-Pencil-Block-Diag.jpeg)
-
-## Detailed Workflow with an Example
-
-### Step 1: Encrypt the Plaintext First (Level 1 encryption)
-
-Using classical encryption schemes: MHKC/AES with crypto secret key K.
-
-```
-"HELLO" -> [Encryption] -> "Xk9mP"
-```
-
-### Step 2: Steganographic Encryption (Level 2 encryption)
-
-Security through obscurity / grid hiding technique.
-
-Fill a grid with random letters and hide encrypted text from Step 1:
-
-```
-X Q Z M P T R N S V B W K D F G C Y A I U E
-K R X N A D M L P Q S Z T Z B F Y W C V G U  <- 'X' hidden here
-F Y k W S C Q N B M K P R T Z A D V L G I H  <- 'k' hidden here
-J U 9 m P I V N T Q R S W V X B A F D C H T  <- '9mP' hidden here
-Z M K P N S T Q R W X B A D F C V Y G U E I
-Q T W R S B N K M P L A X Z Y D F V G C H U
-... (assume 100 more rows of random letters)
-```
-
-### Step 3: Generate Secret Key S
-
-According to the paper, the secret key contains:
-
-```
-Secret Key S = {
-	1. Stencil Set SRl (chosen shapes)
-	2. Bijection function g (maps partitions to stencils)
-	3. MHKC/AES crypto secret key K
-	4. Permutation sigma
-	5. Starting position
-	...
-}
-```
-
-For this example:
-
-```
-Secret Key S = {
-	1. Stencil Set SRl = {"L-shape"}
-	2. Starting_coordinates: {(2,3)}
-	3. Partition: [1, 1, 3]  --> 'X', 'k', '9mP'
-	4. Reading_order: "Top-to-bottom, left-to-right"
-	5. MHKC/AES crypto secret key K
-}
-```
-
-### Step 4: Transmission/Reception Channel - Communication Network
-
-The grid can be transmitted as:
-- Byte stream over network (byte-stream implementation)
-- Physical paper through fax/OCR (OCR implementation)
-
-### Step 5: Steganographic Decryption (Level 1 decryption)
-
-Input:
-1. Obscured grid
-2. Receiver already has secret key S (stencil indices/coordinates + crypto key)
-
-Camera zoom based OCR technique:
-
-```
-Camera uses those coordinates to zoom to specific grid positions
-OCR reads characters at each position -> collects "Xk9mP"
-```
-
-Byte-stream implementation:
-The grid is stored in memory and classical array/pointer mechanisms are used to recover ciphertext.
-
-Output ciphertext:
-
-```
-"Xk9mP"
-```
-
-### Step 6: Decrypt the Ciphertext (Level 2 decryption)
-
-Using classical decryption schemes: MHKC/AES with crypto secret key K.
-
-```
-"Xk9mP" -> [Decryption] -> "HELLO"
-```
+1. [Introduction](#introduction)
+2. [A detailed workflow example](#a-detailed-workflow-example)
+3. [`stencil_lib` API Architecture](#stencil_lib-api-architecture)
+4. [Installation and Usage](#installation-and-usage)
+5. [Project Tooling Files](#project-tooling-files)
+6. [Source Layout](#source-layout)
+7. [Resources](#resources)
 
 ---
 
-## Detailed Architecture for Implementation
+## Introduction
 
-<p align="center">
-	<img src="Stencil_system_architecture.jpeg" alt="Centered image" style="max-width: 150%;">
-</p>
+This project implements a **symmetric key encryption scheme** that combines a classical paper-pencil stencil cipher with a matrix-level cipher and camera zoom capabilities, as described in the research paper:
 
----
+> *"A Camera Zoom-based Paper-Pencil Cipher Encryption Scheme atop Merkle-Hellman Knapsack Cryptosystem"*  
+> Gopal Anantharaman, HP Inc., Palo Alto, CA, USA (June 12, 2024)
 
-## Dependencies
+### How it works — two-level encryption
 
-| Library | Purpose |
-|---|---|
-| `PyCryptodome` (Python) | AES encryption/decryption for PoC implementation |
-| `pytest` | Unit and integration testing |
-| `invoke` | Task runner (`inv build`, `inv test`, `inv clean`) |
+**Level 1 — Cipher encryption (`cipher_encrypt`):**
 
----
+The plaintext is first encrypted with a conventional cipher to produce ciphertext bytes. The paper uses **MHKC** as its reference cipher, but the design is **cipher-agnostic** — any cipher (including relatively weak ones) can be plugged in here. The steganographic layer above provides independent security regardless of the strength of Level 1.
 
-### Crypto-library Choice for Python Implementation
+```
+plaintext bytes  →  [Level 1: cipher_encrypt]  →  ciphertext bytes
+```
 
-Possible open source crypto-libraries: `PyCryptodome` and `cryptography` (PyCA).
+**Level 2 — Steganographic encryption (`steganography_encrypt`):**
 
-- `cryptography` (PyCA): backed by OpenSSL and uses `cffi`; useful for Python wrappers around C in final library direction.
-- `PyCryptodome`: cleaner API/readability (`pad`/`unpad`, compact encrypt/decrypt), a good fit for reference implementation used by tests.
-- Final decision: `PyCryptodome` for the Python proof-of-concept/reference implementation.
+A random grid is generated and filled with pseudo-random noise bytes. The ciphertext bytes from Level 1 are then embedded at the stencil positions inside the grid. An optional permutation σ is applied to the ciphertext bytes before embedding.
+
+```
+ciphertext bytes  →  [permutation σ]  →  embedded into stencil positions in random grid
+                                                            ↓
+                                               obfuscated grid (transmitted)
+```
+
+The grid itself is **not encrypted** — the security comes from hiding the ciphertext among random noise and keeping the stencil positions secret.
+
+**Decryption reverses both levels:**
+
+```
+obfuscated grid  →  [extract stencil positions]  →  [σ⁻¹]  →  ciphertext bytes
+ciphertext bytes →  [Level 1: cipher_decrypt]   →  plaintext bytes
+```
+
+**Transmission:** The obfuscated grid is transmitted as a bytestream over a network or as a physical image read back by camera zoom + OCR.
+
+### Security properties
+
+- **Cipher-agnostic + layered obfuscation:** Any cipher can be used at Level 1 (MHKC is the paper's reference). Even if Level 1 is fully broken, the adversary only recovers a flat byte sequence — without the stencil subset $SR_l$, permutation σ, and partition $R_l$, the plaintext remains hidden.
+- **IND-CPA reconciliation:** The random decoy fill and stencil randomisation make the ciphertext computationally indistinguishable from random noise.
+
+### Secret key (`SecretKey`)
+
+| Field | Description |
+|-------|-------------|
+| `stencils` | List of `Stencil` objects — the chosen stencil subset $SR_l$ |
+| `partition_list` | Partition sizes $R_l$ (e.g. `[1, 1, 3]`) — how ciphertext bytes are split across stencils |
+| `cipher_cfg` | `CipherConfig` subclass bundling the Level 1 cipher algorithm + key material |
+| `cipher_permutation` | *(optional)* byte-index shuffle applied to ciphertext before stencil placement |
+| `grid_permutation` | *(optional)* stencil-slot shuffle applied after natural ciphertext splitting |
+
+### Stencil configuration (`StencilConfig`) — used by `keygen` to produce a `SecretKey`
+
+| Field | Description |
+|-------|-------------|
+| `total_bytes` | Ciphertext length (bytes) |
+| `num_partitions` | Number of stencil groups to generate |
+| `grid_shape` | `GridShape` specifying grid dimensions |
+| `enable_cipher_permutation` | If `True`, generate and apply `cipher_permutation` |
+| `enable_grid_permutation` | If `True`, generate and apply `grid_permutation` |
+| `enable_subdomain_partitioning` | If `True`, place stencils within defined grid subdomains |
+
+![The Dataflow](docs/Paper-Pencil-Block-Diag.jpeg)
+
+## A detailed workflow example
+
+See [docs/Workflow_Example.md](docs/Workflow_Example.md) for a step-by-step walkthrough of the encryption and decryption process.
+
+## `stencil_lib` API Architecture
+
+See [docs/Stencil_System_Architecture.md](docs/Stencil_System_Architecture.md) for the architecture diagram.
 
 ---
 
@@ -181,7 +146,6 @@ Individual test targets: `inv test_unit`, `inv test_integration`, `inv test_sw`
 ### `pyproject.toml` - package definition
 
 Defines project metadata and build backend.
-
 For more details, see the [Python Packaging User Guide on pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/).
 
 ```
@@ -198,12 +162,41 @@ Defines custom CLI tasks using [`invoke`](https://www.pyinvoke.org/).
 ### `conftest.py` - pytest configuration
 
 Auto-loaded by pytest. Locates wheel in `build/dist/*.whl` and installs it for tests.
-
 For more details, see [pytest documentation on conftest.py](https://docs.pytest.org/en/stable/reference/fixtures.html#conftest-py).
 
 ---
 
-For the phased roadmap and task checklist, see [Implementation_checklist.md](Implementation_checklist.md).
+## Source Layout
+
+### `src/` — `stencil_lib` library
+
+The `src/python/` directory contains the source code that is built into the `stencil_lib` Python package (installed as a `.whl` via `inv build`). It exposes the core cryptographic APIs:
+
+```
+src/python/
+|-- stencil_lib.py        (public API surface — re-exports all key functions)
+|-- common/               (shared data classes: CipherConfig, SecretKey, Grid, etc.)
+|-- Encryption/           (cipher_encrypt, steganography_encrypt, encrypt orchestration)
+|-- Decryption/           (cipher_decrypt, steganography_decrypt, decrypt orchestration)
+`-- Keygen/               (keygen, stencil coordinate and permutation generation)
+```
+
+### `stencil_system/` — Proof-of-concept application (`stencil_system`)
+
+`stencil_system` is a standalone proof-of-concept that demonstrates a full end-to-end cryptographic system built using `stencil_lib`. It is **not** part of the installable library; it depends on `stencil_lib` being built first (`inv build`).
+
+```
+stencil_system/
+|-- python/
+|   |-- stencil_system_MODE_A_Bytestream.ipynb   (end-to-end demo notebook)
+|   |-- CommunicationProtocol/                   (bytestream grid transmission protocol)
+|   `-- KeyExchange/                             (secret key serialization and exchange)
+`-- Readme.md
+```
+
+The notebook `stencil_system_MODE_A_Bytestream.ipynb` walks through the full sender → receiver flow: key generation, encryption, steganographic embedding, bytestream transmission, extraction, and decryption.
+
+---
 
 ## Resources
 
